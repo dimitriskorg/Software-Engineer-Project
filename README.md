@@ -1,2 +1,8 @@
 # Software-Engineer-Project
-Github για το Project στην Τεχνολογία Λογισμικού
+Paradoteo 1
+
+-Project-description-v0.1
+-Use-case-v0.1
+-Domain-model-v0.1
+
+-Project-code-v0.1
