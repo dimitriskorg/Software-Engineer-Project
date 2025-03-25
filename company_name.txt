@@ -3,11 +3,11 @@
 
 	OrderFlow    ---> Protinw auto alla eimai anoixtos
 			  kai se opoiadipote apo tis parakatw 
-			  potaseis
+			  protaseis
 
 ------------------------------------------------------
 
-	Yappmaster
+	Y(app)master
 
 ------------------------------------------------------
 
