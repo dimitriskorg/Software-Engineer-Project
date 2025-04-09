@@ -1,8 +1,8 @@
 # Software-Engineer-Project
-Paradoteo 1
+Paradoteo 2
 
--Project-description-v0.1
--Use-case-v0.1
--Domain-model-v0.1
+Robustness-diagram-v0.1
+Use-case-v0.x (αν υπάρχει νέα έκδοση, κανονικά θα πρέπει να υπάρχει)
+Domain-model-v0.x (αν υπάρχει νέα έκδοση, κανονικά θα πρέπει να υπάρχει)
 
--Project-code-v0.1
+Project-code-v0.1
