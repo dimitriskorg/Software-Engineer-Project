@@ -1,3 +1,10 @@
+/* Αυτή η κλάση αφορά το Login Page. To σκεπτικό είναι πως αρχικά συνδέεται με τη βάση δεδομέων
+ * και αποθηκεύει την σύνδεση για την υπόλοιπη εφαρμογή. Ο λόγος που γίνεται αυτό, είναι για να 
+ * μην συνδεόμαστε κάθε φορά που θέλουμε να εκτελέσουμε ένα query. Στην συνέχεια, εισάγει ο χρήστης 
+ * τα στοιχεία του, ψάχνει στον πίνακα User αν υπάρχει φορτώνει την αρχική σελίδα και περνάει σε
+ * αυτήν τον χρήστη που συνδέθηκε και την σύνδεση.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -6,6 +13,10 @@ import java.sql.*;
 public class LoginPage extends JFrame {
     private JTextField emailField;
     private JPasswordField passwordField;
+    
+    // Στατική μεταβλητή για τον χρήστη
+    private static User loggedInUser;
+    private static Connection conn;
     
     public LoginPage() {
         // Set up the main frame
@@ -67,7 +78,7 @@ public class LoginPage extends JFrame {
         loginButton.setForeground(Color.WHITE);
         loginButton.setBorderPainted(false);
         loginButton.setFocusPainted(false);
-        loginButton.addActionListener(e -> authenticateUser());
+        loginButton.addActionListener(e -> authenticateUser(conn));
         buttonPanel.add(loginButton);
         
         // Add components to the center panel
@@ -90,11 +101,13 @@ public class LoginPage extends JFrame {
         setVisible(true);
     }
 
-    private void authenticateUser() {
+    private void authenticateUser(Connection conn) {
         String email = emailField.getText();
         String password = new String(passwordField.getPassword());
 
-        try (Connection conn = database.getConnection()) {
+        try {
+            conn = database.getConnection();
+
             String query = "SELECT * FROM User WHERE email = ? AND password = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
@@ -103,8 +116,15 @@ public class LoginPage extends JFrame {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                loggedInUser = new User(
+                        rs.getInt("UserID"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("email"),
+                        rs.getString("role")
+                );
                 String role = rs.getString("role");
-                launchRolePage(role);
+                loadHomePage(loggedInUser, conn);
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials");
             }
@@ -114,10 +134,15 @@ public class LoginPage extends JFrame {
         }
     }
 
-    private void launchRolePage(String role) {
+    private void loadHomePage(User user, Connection conn) {
         this.dispose(); // Close the login window
         // Open the home page for all users
-        SwingUtilities.invokeLater(() -> new HomePage(role));
+        SwingUtilities.invokeLater(() -> new HomePage(user, conn));
+    }
+
+    // Μέθοδος για να πάρεις τον συνδεδεμένο χρήστη
+    public static User getLoggedInUser() {
+        return loggedInUser;
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,11 @@
-public class DeliveryDriver {
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import javax.swing.JOptionPane;
+
+public class DeliveryDriver extends User {
     private int driverID;
-    private int userID;
     private String name;
     private String phone;
     private String licenseNumber;
@@ -11,9 +16,9 @@ public class DeliveryDriver {
         // Default constructor
     }
 
-    public DeliveryDriver(int driverID, int userID, String name, String phone, String licenseNumber, int assignedOrders) {
+    public DeliveryDriver(int driverID, int userID, String username, String password, String email, String role, String name, String phone, String licenseNumber, int assignedOrders) {
+        super(userID, username, password, email, role); // Call to the superclass (User) constructor
         this.driverID = driverID;
-        this.userID = userID;
         this.name = name;
         this.phone = phone;
         this.licenseNumber = licenseNumber;
@@ -27,14 +32,6 @@ public class DeliveryDriver {
 
     public void setDriverID(int driverID) {
         this.driverID = driverID;
-    }
-
-    public int getUserID() {
-        return userID;
-    }
-
-    public void setUserID(int userID) {
-        this.userID = userID;
     }
 
     public String getName() {
@@ -69,8 +66,43 @@ public class DeliveryDriver {
         this.assignedOrders = assignedOrders;
     }
 
+    public void updateOrderStatus(int orderID, String status, Connection conn){
+        if (status == "Completed"){
+            String updateSql = "UPDATE OrderTable SET status = 'Completed' WHERE OrderID = ?";
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+                pstmt.setInt(1, orderID);    // βάζουμε το orderID στο ερώτημα
+                int rows = pstmt.executeUpdate();           // εκτελεί την ενημέρωση
+                if (rows > 0) {
+                    JOptionPane.showMessageDialog(null, "Order #" + orderID + " has been completed.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "No Order found with ID=" + orderID);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null,"Error updating order status.");
+            }
+
+        } else if (status == "Canceled"){
+            String updateSql = "UPDATE OrderTable SET status = 'Canceled' WHERE OrderID = ?";
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+                pstmt.setInt(1, orderID);    // βάζουμε το orderID στο ερώτημα
+                int rows = pstmt.executeUpdate();           // εκτελεί την ενημέρωση
+                if (rows > 0) {
+                    JOptionPane.showMessageDialog(null, "Order #" + orderID + " has been cancelled.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "No Order found with ID=" + orderID);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null,"Error updating order status.");
+            }
+        }
+    }
+
     @Override
     public String toString() {
-        return name + " DriverID: " + driverID + " UserID: " + userID + " Phone: " + phone;
+        return super.getUsername() + " DriverID: " + driverID + " UserID: " + super.getUserID() + " Phone: " + phone;
     }
 }

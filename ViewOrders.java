@@ -1,3 +1,12 @@
+/* Εδώ φορτώνονται όλες οι παραγγελίες από τον πίνακα OrderTable και προβάλονται οι σχετικές
+ * πληροφορίες αυτών και των πελατών. Με την συνάρτηση showOrders αντλούνται οι πληροφορίες
+ * για τις παραγγελίες και τους πελάτες και με την addOrderInfo προβάλονται στην οθόνη. Τέλος, 
+ * ανάλογα με το ποιο κουμπί πατήθηκε (Ολοκλήρωση/Ακύρωση) καλέιται η μέθοδος του deliveryDriver
+ * updateOrderStatus. 
+ * !!! Ο λόγος που έγινε όλο αυτό με το να περνάμε σαν όρισμα τον χρήστη που συνδέθηκε
+ * είναι επειδή η λειτουργία της μεθόδου updateOrderStatus, δεν αφορά την οθόνη ώστε να είναι απλά
+ * ορισμένη εκεί, αλλά του διανομέα !!!.
+ */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -7,17 +16,21 @@ import java.sql.Date;
 import java.util.*;
 import java.util.List;
 
-public class usecase3 extends JFrame {
+public class ViewOrders extends JFrame {
     private JPanel orderListPanel;
     private JDialog assignDialog;
     private JDialog statusDialog;
     private JTextArea orderDetailsArea;
-
-    // Database connection variables
-    private Connection conn;
-    private List<DeliveryDriver> deliveryDrivers = new ArrayList<>();
     
-    public usecase3() {
+    // Database connection variables
+    public Connection conn;
+    private List<DeliveryDriver> deliveryDrivers = new ArrayList<>();
+    public DeliveryDriver deliveryDriver;
+
+    public ViewOrders(DeliveryDriver deliveryDriver, Connection conn) {
+        this.deliveryDriver = deliveryDriver;
+        this.conn = conn;
+
         // Basic window setup
         setTitle("View Orders");
         setSize(800, 600);
@@ -176,7 +189,7 @@ public class usecase3 extends JFrame {
                 int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to complete the order ?", "Yes", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     
-                    updateOrderStatus(order.getOrderID(), "Completed");
+                    deliveryDriver.updateOrderStatus(order.getOrderID(), "Completed", conn);
                 }
             
         });
@@ -192,7 +205,7 @@ public class usecase3 extends JFrame {
         cancelButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to cancel the order ?", "Yes", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                updateOrderStatus(order.getOrderID(), "Canceled");
+                deliveryDriver.updateOrderStatus(order.getOrderID(), "Canceled", conn);
             }
         });
         
@@ -226,43 +239,6 @@ public class usecase3 extends JFrame {
         orderListPanel.add(Box.createRigidArea(new Dimension(0, 10)));
     }
     
-    private void updateOrderStatus(int orderID, String status){
-        if (status == "Completed"){
-            String updateSql = "UPDATE OrderTable SET status = 'Completed' WHERE OrderID = ?";
-            
-            try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
-                pstmt.setInt(1, orderID);    // βάζουμε το orderID στο ερώτημα
-                int rows = pstmt.executeUpdate();           // εκτελεί την ενημέρωση
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Order #" + orderID + " has been completed.");
-                } else {
-                    JOptionPane.showMessageDialog(this, "No Order found with ID=" + orderID);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                "Error updating order status.");
-            }
-
-        } else if (status == "Canceled"){
-            String updateSql = "UPDATE OrderTable SET status = 'Canceled' WHERE OrderID = ?";
-            
-            try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
-                pstmt.setInt(1, orderID);    // βάζουμε το orderID στο ερώτημα
-                int rows = pstmt.executeUpdate();           // εκτελεί την ενημέρωση
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Order #" + orderID + " has been cancelled.");
-                } else {
-                    JOptionPane.showMessageDialog(this, "No Order found with ID=" + orderID);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                "Error updating order status.");
-            }
-        }
-    }
-
     private void createAssignDialog() {
     assignDialog = new JDialog(this, "Select Courier", true);
     assignDialog.setSize(450, 200);
@@ -280,17 +256,21 @@ public class usecase3 extends JFrame {
     // === Φόρτωση οδηγών από τη βάση ===
     try (
          Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery("SELECT * FROM DeliveryDriver")) {
+         ResultSet rs = stmt.executeQuery("SELECT * FROM DeliveryDriver INNER JOIN User on DeliveryDriver.UserID = User.UserID")) {
 
         while (rs.next()) {
-            int driverID = rs.getInt("DriverID");
-            int userID = rs.getInt("UserID");
+            int driverID = rs.getInt("driverID");
+            int userID = rs.getInt("userID");
+            String username = rs.getString("username");
+            String password = rs.getString("password");
+            String email = rs.getString("email");
+            String role = rs.getString("role");
             String name = rs.getString("name");
             String phone = rs.getString("phone");
-            String licenseNumber = rs.getString("LicenseNumber");
+            String licenseNumber = rs.getString("licenseNumber");
             int assignedOrders = rs.getInt("assignedOrders");
 
-            DeliveryDriver deliveryDriver = new DeliveryDriver(driverID, userID, name, phone, licenseNumber, assignedOrders);
+            DeliveryDriver deliveryDriver = new DeliveryDriver(driverID, userID, username, password, email, role, name, phone, licenseNumber, assignedOrders);
             deliveryDrivers.add(deliveryDriver);
         }
     } catch (SQLException e) {
@@ -399,10 +379,4 @@ public class usecase3 extends JFrame {
     statusDialog.setVisible(true);
 }
     
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            usecase3 frame = new usecase3();
-            frame.setVisible(true);
-        });
-    }
 }
