@@ -247,3 +247,17 @@ public class Expenses {
         this.date = date;
     }
 }
+
+public class InventoryEmployee {
+    private int employeeID;
+    private String name;
+    private String phone;
+
+    public InventoryEmployee(int employeeID, String name, String phone) {
+        this.employeeID = employeeID;
+        this.name = name;
+        this.phone = phone;
+    }
+
+}
+
