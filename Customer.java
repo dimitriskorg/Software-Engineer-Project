@@ -1,3 +1,6 @@
+import java.sql.*;
+import javax.swing.JOptionPane;
+
 public class Customer {
     private int customerID;
     private String name;
@@ -59,15 +62,32 @@ public class Customer {
         this.address = address;
     }
 
-    // Optional: toString method for debugging
     @Override
     public String toString() {
-        return "Customer{" +
-                "customerID=" + customerID +
-                ", name='" + name + '\'' +
-                ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
-                ", address='" + address + '\'' +
-                '}';
+        return name + " (" + email + ")";
+    }
+    
+    public static int addNewCustomer(Customer c, Connection conn) {
+        String sql = "INSERT INTO Customer (name, phone, email, address) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, c.getName());
+            stmt.setString(2, c.getPhone());
+            stmt.setString(3, c.getEmail());
+            stmt.setString(4, c.getAddress());
+            stmt.executeUpdate();
+            
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                JOptionPane.showMessageDialog(null, "Δεν επιστράφηκε customerID από τη βάση.", 
+                                             "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                return -1;
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Σφάλμα κατά την προσθήκη πελάτη: " + e.getMessage(), 
+                                         "Σφάλμα Βάσης Δεδομένων", JOptionPane.ERROR_MESSAGE);
+            return -1;
+        }
     }
 }

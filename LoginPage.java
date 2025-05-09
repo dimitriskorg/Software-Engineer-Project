@@ -7,7 +7,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.*;
 
 public class LoginPage extends JFrame {
@@ -123,7 +122,6 @@ public class LoginPage extends JFrame {
                         rs.getString("email"),
                         rs.getString("role")
                 );
-                String role = rs.getString("role");
                 loadHomePage(loggedInUser, conn);
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials");

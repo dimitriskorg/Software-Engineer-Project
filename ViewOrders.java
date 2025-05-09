@@ -1,12 +1,3 @@
-/* Εδώ φορτώνονται όλες οι παραγγελίες από τον πίνακα OrderTable και προβάλονται οι σχετικές
- * πληροφορίες αυτών και των πελατών. Με την συνάρτηση showOrders αντλούνται οι πληροφορίες
- * για τις παραγγελίες και τους πελάτες και με την addOrderInfo προβάλονται στην οθόνη. Τέλος, 
- * ανάλογα με το ποιο κουμπί πατήθηκε (Ολοκλήρωση/Ακύρωση) καλέιται η μέθοδος του deliveryDriver
- * updateOrderStatus. 
- * !!! Ο λόγος που έγινε όλο αυτό με το να περνάμε σαν όρισμα τον χρήστη που συνδέθηκε
- * είναι επειδή η λειτουργία της μεθόδου updateOrderStatus, δεν αφορά την οθόνη ώστε να είναι απλά
- * ορισμένη εκεί, αλλά του διανομέα !!!.
- */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -21,14 +12,15 @@ public class ViewOrders extends JFrame {
     private JDialog assignDialog;
     private JDialog statusDialog;
     private JTextArea orderDetailsArea;
+    private int currentOrderID; // Προσθήκη μεταβλητής για αποθήκευση του τρέχοντος OrderID
     
     // Database connection variables
     public Connection conn;
     private List<DeliveryDriver> deliveryDrivers = new ArrayList<>();
-    public DeliveryDriver deliveryDriver;
+    public User user;
 
-    public ViewOrders(DeliveryDriver deliveryDriver, Connection conn) {
-        this.deliveryDriver = deliveryDriver;
+    public ViewOrders(User user, Connection conn) {
+        this.user = user;
         this.conn = conn;
 
         // Basic window setup
@@ -36,14 +28,7 @@ public class ViewOrders extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
-        // Initialize database connection
-        try {
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/softengproject", "root", "12345");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
+                
         // Create header
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BorderLayout());
@@ -62,7 +47,19 @@ public class ViewOrders extends JFrame {
         logoutButton.setContentAreaFilled(true);
         logoutButton.setBorderPainted(false);
         logoutButton.addActionListener(e -> System.exit(0));
-        
+
+        // Back button
+        JButton backButton = new JButton("Πίσω");
+        backButton.setBackground(new Color(194, 165, 108));
+        backButton.setForeground(Color.WHITE);
+        backButton.setBorderPainted(false);
+        backButton.setFocusPainted(false);
+        backButton.addActionListener(e -> {
+            this.dispose();
+            new HomePage(new User(user.getUserID(), user.getUsername(), 
+                       user.getPassword(), user.getEmail(), user.getRole()), conn);
+        });
+        headerPanel.add(backButton, BorderLayout.WEST);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         headerPanel.add(logoutButton, BorderLayout.EAST);
         
@@ -77,7 +74,7 @@ public class ViewOrders extends JFrame {
         orderListPanel.setBackground(new Color(244, 244, 244)); // #f4f4f4
         
         // Add orders dynamically from the database
-        showOrders();
+        loadOrders();
         
         // Create scroll panel for order list
         JScrollPane scrollPane = new JScrollPane(orderListPanel);
@@ -88,7 +85,7 @@ public class ViewOrders extends JFrame {
         containerPanel.add(scrollPane);
         
         // Create the modals
-        createAssignDialog();
+        loadDrivers();
         createStatusDialog();
         
         // Add all components to the frame
@@ -97,37 +94,102 @@ public class ViewOrders extends JFrame {
         getContentPane().add(containerPanel, BorderLayout.WEST);
     }
     
-    private void showOrders() {
-        String query = "SELECT * FROM  OrderTable ordtbl INNER JOIN Customer c ON ordtbl.CustomerID = c.CustomerID;"; // Replace with your actual query
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-            
-            while (rs.next()) {
-                // Order Info
-                int orderID = rs.getInt("orderID");
-                int customerID = rs.getInt("customerID");
-                String status = rs.getString("status");
-                Date orderDate = rs.getDate("orderDate");
-                Date deliveryDate = rs.getDate("deliveryDate");
-                double totalAmount = rs.getDouble("totalAmount");
-                // Customer Info
-                String name = rs.getString("name");
-                String phone = rs.getString("phone");
-                String email = rs.getString("email");
-                String address = rs.getString("address");
-                
-                // Create an Order object and add it to the panel
-                Order order = new Order(orderID, customerID, status, orderDate, deliveryDate, totalAmount);
-                Customer customer = new Customer(customerID, name, phone, email, address);
-                addOrderInfo(order, customer);
-
+    private void loadOrders() {
+        String query = "";
+        if ("Manager".equals(user.getRole())) {
+            // Ο Manager βλέπει όλες τις παραγγελίες
+            query = "SELECT ordtbl.*, c.* FROM OrderTable ordtbl INNER JOIN Customer c ON ordtbl.CustomerID = c.CustomerID";
+        } else if ("DeliveryDriver".equals(user.getRole())) {
+            // Ο DeliveryDriver βλέπει μόνο τις παραγγελίες που έχουν ανατεθεί σε αυτόν
+            query = "SELECT o.*, c.* FROM OrderTable o " +
+                    "INNER JOIN Customer c ON o.CustomerID = c.CustomerID " +
+                    "INNER JOIN DriverOrders d ON o.OrderID = d.OrderID " +
+                    "WHERE d.DriverID = ?";
+        }
+    
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            if ("DeliveryDriver".equals(user.getRole())) {
+                // Προσοχή: Το user.getUserID() πρέπει να δίνει το DriverID και όχι το UserID
+                // Αν ο DeliveryDriver χρειάζεται να έχει πρόσβαση στο δικό του DriverID
+                DeliveryDriver driver = getDeliveryDriverByUserID(user.getUserID());
+                if (driver != null) {
+                    stmt.setInt(1, driver.getDriverID());
+                } else {
+                    // Αν δεν βρεθεί ο driver, δεν θα εμφανιστούν παραγγελίες
+                    JOptionPane.showMessageDialog(this, "Δεν βρέθηκε ο οδηγός με το συγκεκριμένο UserID", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+    
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Order Info
+                    int orderID = rs.getInt("orderID");
+                    int customerID = rs.getInt("customerID");
+                    String status = rs.getString("status");
+                    Date orderDate = rs.getDate("orderDate");
+                    Date deliveryDate = rs.getDate("deliveryDate");
+                    double totalAmount = rs.getDouble("totalAmount");
+                    
+                    // Customer Info
+                    String name = rs.getString("name");
+                    String phone = rs.getString("phone");
+                    String email = rs.getString("email");
+                    String address = rs.getString("address");
+    
+                    // Create an Order object and add it to the panel
+                    Order order = new Order(orderID, customerID, status, orderDate, deliveryDate, totalAmount);
+                    Customer customer = new Customer(customerID, name, phone, email, address);
+                    showOrders(order, customer);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     
-    private void addOrderInfo(Order order, Customer customer) {
+    // Μέθοδος για εύρεση του DeliveryDriver με βάση το UserID
+    private DeliveryDriver getDeliveryDriverByUserID(int userID) {
+        String query = "SELECT * FROM DeliveryDriver WHERE UserID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int driverID = rs.getInt("driverID");
+                    String name = rs.getString("name");
+                    String phone = rs.getString("phone");
+                    String licenseNumber = rs.getString("licenseNumber");
+                    int assignedOrders = rs.getInt("assignedOrders");
+                    
+                    // Δημιουργία του αντικειμένου DeliveryDriver
+                    return new DeliveryDriver(driverID, userID, user.getUsername(), 
+                                            user.getPassword(), user.getEmail(), user.getRole(), 
+                                            name, phone, licenseNumber, assignedOrders);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    // Έλεγχος αν η παραγγελία έχει ήδη ανατεθεί
+    private boolean isOrderAssigned(int orderID) {
+        String query = "SELECT COUNT(*) FROM DriverOrders WHERE OrderID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, orderID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    private void showOrders(Order order, Customer customer) {
         JPanel orderPanel = new JPanel();
         orderPanel.setLayout(new BoxLayout(orderPanel, BoxLayout.Y_AXIS));
         orderPanel.setBackground(Color.WHITE);
@@ -156,15 +218,35 @@ public class ViewOrders extends JFrame {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonsPanel.setBackground(Color.WHITE);
         
-        // Fixed assign button - brown background (#c2a56c) with black text
-        JButton assignButton = new JButton("Assign");
-        assignButton.setBackground(new Color(194, 165, 108)); // #c2a56c
-        assignButton.setForeground(Color.BLACK);
-        assignButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        assignButton.setOpaque(true);
-        assignButton.setContentAreaFilled(true);
-        assignButton.setBorderPainted(false);
-        assignButton.addActionListener(e -> showAssignmentPopup(order.getOrderID()));
+        // Έλεγχος εάν η παραγγελία έχει ανατεθεί
+        boolean isAssigned = isOrderAssigned(order.getOrderID());
+        
+        // Το κουμπί ανάθεσης εμφανίζεται μόνο στον Manager
+        if ("Manager".equals(user.getRole())) {
+            if (!isAssigned) {
+                // Κουμπί ανάθεσης - καφέ φόντο (#c2a56c) με μαύρο κείμενο
+                JButton assignButton = new JButton("Assign");
+                assignButton.setBackground(new Color(194, 165, 108)); // #c2a56c
+                assignButton.setForeground(Color.BLACK);
+                assignButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                assignButton.setOpaque(true);
+                assignButton.setContentAreaFilled(true);
+                assignButton.setBorderPainted(false);
+                assignButton.addActionListener(e -> showAssignmentPopup(order.getOrderID()));
+                buttonsPanel.add(assignButton);
+            } else {
+                // Κουμπί ακύρωσης ανάθεσης - πορτοκαλί φόντο με μαύρο κείμενο
+                JButton unassignButton = new JButton("Cancel Assign");
+                unassignButton.setBackground(new Color(255, 165, 0)); // πορτοκαλί
+                unassignButton.setForeground(Color.BLACK);
+                unassignButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                unassignButton.setOpaque(true);
+                unassignButton.setContentAreaFilled(true);
+                unassignButton.setBorderPainted(false);
+                unassignButton.addActionListener(e -> unassignOrder(order.getOrderID()));
+                buttonsPanel.add(unassignButton);
+            }
+        }
         
         // Fixed status button - green background (#7a9c5f) with white text
         JButton statusButton = new JButton("Status");
@@ -175,45 +257,43 @@ public class ViewOrders extends JFrame {
         statusButton.setContentAreaFilled(true);
         statusButton.setBorderPainted(false);
         statusButton.addActionListener(e -> checkOrderStatus(order.getOrderID()));
+        buttonsPanel.add(statusButton);
         
-        // Fixed status button - green background (#7a9c5f) with white text
-        JButton completeButton = new JButton("Complete");
-        completeButton.setBackground(new Color(0, 200, 0)); // #7a9c5f
-        completeButton.setForeground(Color.WHITE);
-        completeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        completeButton.setOpaque(true);
-        completeButton.setContentAreaFilled(true);
-        completeButton.setBorderPainted(false);
-        completeButton.addActionListener(e -> {
-            
+        // Τα κουμπιά Complete και Cancel εμφανίζονται μόνο στον DeliveryDriver
+        if ("DeliveryDriver".equals(user.getRole())) {
+            // Fixed status button - green background (#7a9c5f) with white text
+            JButton completeButton = new JButton("Complete");
+            completeButton.setBackground(new Color(0, 200, 0)); // πράσινο
+            completeButton.setForeground(Color.WHITE);
+            completeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            completeButton.setOpaque(true);
+            completeButton.setContentAreaFilled(true);
+            completeButton.setBorderPainted(false);
+            completeButton.addActionListener(e -> {
                 int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to complete the order ?", "Yes", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    
-                    deliveryDriver.updateOrderStatus(order.getOrderID(), "Completed", conn);
+                    order.updateOrderStatus(order.getOrderID(), "Completed", conn);
                 }
+            });
+            buttonsPanel.add(completeButton);
             
-        });
-        
-        // Fixed status button - green background (#7a9c5f) with white text
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBackground(new Color(255, 0, 0)); // #7a9c5f
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        cancelButton.setOpaque(true);
-        cancelButton.setContentAreaFilled(true);
-        cancelButton.setBorderPainted(false);
-        cancelButton.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to cancel the order ?", "Yes", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                deliveryDriver.updateOrderStatus(order.getOrderID(), "Canceled", conn);
-            }
-        });
-        
-        buttonsPanel.add(assignButton);
-        buttonsPanel.add(statusButton);
-        buttonsPanel.add(completeButton);
-        buttonsPanel.add(cancelButton);
-       
+            // Fixed status button - red background with white text
+            JButton cancelButton = new JButton("Cancel");
+            cancelButton.setBackground(new Color(255, 0, 0)); // κόκκινο
+            cancelButton.setForeground(Color.WHITE);
+            cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            cancelButton.setOpaque(true);
+            cancelButton.setContentAreaFilled(true);
+            cancelButton.setBorderPainted(false);
+            cancelButton.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to cancel the order ?", "Yes", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    order.updateOrderStatus(order.getOrderID(), "Canceled", conn);
+                }
+            });
+            buttonsPanel.add(cancelButton);
+        }
+
         // Order Info
         orderPanel.add(idLabel);
         orderPanel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -239,7 +319,69 @@ public class ViewOrders extends JFrame {
         orderListPanel.add(Box.createRigidArea(new Dimension(0, 10)));
     }
     
-    private void createAssignDialog() {
+    // Μέθοδος για την ακύρωση ανάθεσης παραγγελίας
+    private void unassignOrder(int orderID) {
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to unaasign the order #" + orderID + "?", 
+            "Confirm", JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                // Βρίσκουμε πρώτα το DriverID για να ενημερώσουμε το assignedOrders
+                String getDriverQuery = "SELECT DriverID FROM DriverOrders WHERE OrderID = ?";
+                PreparedStatement getDriverStmt = conn.prepareStatement(getDriverQuery);
+                getDriverStmt.setInt(1, orderID);
+                ResultSet rs = getDriverStmt.executeQuery();
+                
+                if (rs.next()) {
+                    int driverID = rs.getInt("DriverID");
+                    
+                    // 1. Μειώνουμε το assignedOrders του οδηγού
+                    String updateDriverQuery = "UPDATE DeliveryDriver SET assignedOrders = assignedOrders - 1 WHERE driverID = ?";
+                    PreparedStatement updateDriverStmt = conn.prepareStatement(updateDriverQuery);
+                    updateDriverStmt.setInt(1, driverID);
+                    updateDriverStmt.executeUpdate();
+                    
+                    // 2. Διαγράφουμε την εγγραφή από το DriverOrders
+                    String deleteAssignmentQuery = "DELETE FROM DriverOrders WHERE OrderID = ?";
+                    PreparedStatement deleteStmt = conn.prepareStatement(deleteAssignmentQuery);
+                    deleteStmt.setInt(1, orderID);
+                    deleteStmt.executeUpdate();
+                    
+                    // 3. Ενημερώνουμε την κατάσταση της παραγγελίας πίσω σε "Pending"
+                    String updateOrderStatusQuery = "UPDATE OrderTable SET status = 'Pending' WHERE orderID = ?";
+                    PreparedStatement updateOrderStmt = conn.prepareStatement(updateOrderStatusQuery);
+                    updateOrderStmt.setInt(1, orderID);
+                    updateOrderStmt.executeUpdate();
+                    
+                    JOptionPane.showMessageDialog(this, 
+                        "Η ανάθεση της παραγγελίας #" + orderID + " ακυρώθηκε επιτυχώς.", 
+                        "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                        
+                    // Ανανεώνουμε την οθόνη για να εμφανιστούν οι αλλαγές
+                    refreshOrderList();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, 
+                    "Σφάλμα κατά την ακύρωση της ανάθεσης: " + e.getMessage(), 
+                    "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    // Μέθοδος για ανανέωση της λίστας παραγγελιών
+    private void refreshOrderList() {
+        // Καθαρίζουμε την υπάρχουσα λίστα
+        orderListPanel.removeAll();
+        // Φορτώνουμε τις παραγγελίες ξανά
+        loadOrders();
+        // Ανανεώνουμε την οθόνη
+        orderListPanel.revalidate();
+        orderListPanel.repaint();
+    }
+    
+    private void loadDrivers() {
     assignDialog = new JDialog(this, "Select Courier", true);
     assignDialog.setSize(450, 200);
     assignDialog.setLocationRelativeTo(this);
@@ -289,9 +431,16 @@ public class ViewOrders extends JFrame {
     confirmButton.addActionListener(e -> {
         DeliveryDriver selectedDriver = (DeliveryDriver) delivererComboBox.getSelectedItem();
         if (selectedDriver != null) {
-            JOptionPane.showMessageDialog(this, "Assigned to: " + selectedDriver.getName());
+            // Χρησιμοποιούμε το currentOrderID που έχει οριστεί κατά την κλήση της showAssignmentPopup
+            JOptionPane.showMessageDialog(this, "Assigned order #" + currentOrderID + " to: " + selectedDriver.getName());
+            
+            // Εδώ θα μπορούσαμε να καλέσουμε μια μέθοδο για να αποθηκεύσουμε την ανάθεση στη βάση
+            assignOrderToDriver(currentOrderID, selectedDriver.getDriverID());
             
             assignDialog.setVisible(false);
+            
+            // Ανανέωση της λίστας παραγγελιών
+            refreshOrderList();
         }
     });
 
@@ -309,6 +458,49 @@ public class ViewOrders extends JFrame {
 
     assignDialog.add(contentPanel, BorderLayout.CENTER);
 }
+
+    // Μέθοδος για να αναθέσουμε την παραγγελία σε έναν οδηγό
+    private void assignOrderToDriver(int orderID, int driverID) {
+        try {
+            // Έλεγχος αν η παραγγελία είναι ήδη ανατεθειμένη
+            String checkQuery = "SELECT * FROM DriverOrders WHERE OrderID = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
+            checkStmt.setInt(1, orderID);
+            ResultSet rs = checkStmt.executeQuery();
+            
+            if (rs.next()) {
+                // Αν υπάρχει ήδη, κάνουμε update
+                String updateQuery = "UPDATE DriverOrders SET DriverID = ? WHERE OrderID = ?";
+                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                updateStmt.setInt(1, driverID);
+                updateStmt.setInt(2, orderID);
+                updateStmt.executeUpdate();
+            } else {
+                // Αν δεν υπάρχει, κάνουμε insert
+                String insertQuery = "INSERT INTO DriverOrders (DriverID, OrderID) VALUES (?, ?)";
+                PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
+                insertStmt.setInt(1, driverID);
+                insertStmt.setInt(2, orderID);
+                insertStmt.executeUpdate();
+            }
+            
+            // Ενημέρωση του πλήθους των παραγγελιών του οδηγού
+            String updateDriverQuery = "UPDATE DeliveryDriver SET assignedOrders = assignedOrders + 1 WHERE driverID = ?";
+            PreparedStatement updateDriverStmt = conn.prepareStatement(updateDriverQuery);
+            updateDriverStmt.setInt(1, driverID);
+            updateDriverStmt.executeUpdate();
+            
+            // Ενημέρωση της κατάστασης της παραγγελίας σε "Assigned"
+            String updateOrderStatusQuery = "UPDATE OrderTable SET status = 'Assigned' WHERE orderID = ?";
+            PreparedStatement updateOrderStmt = conn.prepareStatement(updateOrderStatusQuery);
+            updateOrderStmt.setInt(1, orderID);
+            updateOrderStmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error assigning order: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
    
     private void createStatusDialog() {
         statusDialog = new JDialog(this, "Order Status", true);
@@ -346,37 +538,39 @@ public class ViewOrders extends JFrame {
     }
     
     private void showAssignmentPopup(int orderID) {
-        // Implement action to show assignment dialog and handle it
+        // Αποθηκεύουμε το OrderID στην μεταβλητή της κλάσης
+        this.currentOrderID = orderID;
+        // Εμφανίζουμε το dialog ανάθεσης
+        assignDialog.setTitle("Assign Order #" + orderID);
         assignDialog.setVisible(true);
     }
     
     private void checkOrderStatus(int orderID) { 
-    getOrderStatus(orderID);
-}
+        getOrderStatus(orderID);
+    }
 
     private void getOrderStatus(int orderID){
-    String query = "SELECT status, orderDate, deliveryDate FROM OrderTable WHERE orderID = ?";
-    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-        stmt.setInt(1, orderID);
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                String status = rs.getString("status");
-                Date orderDate = rs.getDate("orderDate");
-                Date deliveryDate = rs.getDate("deliveryDate");
+        String query = "SELECT status, orderDate, deliveryDate FROM OrderTable WHERE orderID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, orderID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("status");
+                    Date orderDate = rs.getDate("orderDate");
+                    Date deliveryDate = rs.getDate("deliveryDate");
 
-                String message = String.format("Order ID: %d\nStatus: %s\nOrder Date: %s\nDelivery Date: %s",
-                        orderID, status, orderDate, deliveryDate);
+                    String message = String.format("Order ID: %d\nStatus: %s\nOrder Date: %s\nDelivery Date: %s",
+                            orderID, status, orderDate, deliveryDate);
 
-                orderDetailsArea.setText(message);
-            } else {
-                orderDetailsArea.setText("No information found for this order.");
+                    orderDetailsArea.setText(message);
+                } else {
+                    orderDetailsArea.setText("No information found for this order.");
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            orderDetailsArea.setText("Error fetching order status.");
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        orderDetailsArea.setText("Error fetching order status.");
+        statusDialog.setVisible(true);
     }
-    statusDialog.setVisible(true);
-}
-    
 }

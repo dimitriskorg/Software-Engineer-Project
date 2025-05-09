@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class HomePage extends JFrame {
     private User user;
@@ -58,24 +59,40 @@ public class HomePage extends JFrame {
                 contentPanel.add(new JLabel("Welcome, Delivery Driver!"));
                 //contentPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
                 contentPanel.add(Box.createRigidArea(new Dimension(0, 20))); // space above
-                JPanel buttonPanel = new JPanel();
+                JPanel buttonPanelD = new JPanel();
                 //buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-                buttonPanel.setBackground(new Color(244, 244, 244));
-                JButton ViewOrders = new JButton("View Orders");
-                ViewOrders.setPreferredSize(new Dimension(150, 40)); // Set a larger siz
-                ViewOrders.setBackground(new Color(194, 165, 108));
-                ViewOrders.setForeground(Color.WHITE);
-                ViewOrders.setBorderPainted(false);
-                ViewOrders.setFocusPainted(false);
-                ViewOrders.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+                buttonPanelD.setBackground(new Color(244, 244, 244));
+                
+                JButton ViewOrdersD = new JButton("View Orders");
+                ViewOrdersD.setPreferredSize(new Dimension(150, 40)); // Set a larger siz
+                ViewOrdersD.setBackground(new Color(194, 165, 108));
+                ViewOrdersD.setForeground(Color.WHITE);
+                ViewOrdersD.setBorderPainted(false);
+                ViewOrdersD.setFocusPainted(false);
+                ViewOrdersD.addActionListener(e -> SwingUtilities.invokeLater(() -> {
                     this.dispose();
                     SwingUtilities.invokeLater(() -> {
                         ViewOrders frame = new ViewOrders(deliveryDriver, conn);
                         frame.setVisible(true);
                     });
                 }));
-                buttonPanel.add(ViewOrders);
-                contentPanel.add(buttonPanel);
+                
+                contentPanel.add(Box.createRigidArea(new Dimension(0, 20))); // space above
+               
+                JButton NewOrder = new JButton("New Order");
+                NewOrder.setPreferredSize(new Dimension(150, 40)); // Set a larger siz
+                NewOrder.setBackground(new Color(194, 165, 108));
+                NewOrder.setForeground(Color.WHITE);
+                NewOrder.setBorderPainted(false);
+                NewOrder.setFocusPainted(false);
+                NewOrder.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+                    this.dispose();
+                    openNewOrderScreen(deliveryDriver, conn); // Οπως ακριβώς περιγράφεται στο Sequence
+                }));
+
+                buttonPanelD.add(NewOrder);
+                buttonPanelD.add(ViewOrdersD);
+                contentPanel.add(buttonPanelD);
                                 
                 break;
             case "ProductionEmployee":
@@ -89,10 +106,47 @@ public class HomePage extends JFrame {
                 // Add components for accountant
                 break;
             case "Manager":
-                contentPanel.add(new JLabel("Welcome, Manager!"));
-                contentPanel.add(new JLabel("Here is the company overview:"));
-                // Add components for manager
-                break;
+            contentPanel.add(new JLabel("Welcome, Manager!"));                
+    
+            Manager manager = getManagerByUserID(user.getUserID(), conn);
+            
+            contentPanel.add(Box.createRigidArea(new Dimension(0, 20))); // space above
+            JPanel buttonPanelM = new JPanel();
+            buttonPanelM.setBackground(new Color(244, 244, 244));
+            
+            JButton ViewOrdersM = new JButton("View Orders");
+            ViewOrdersM.setPreferredSize(new Dimension(150, 40));
+            ViewOrdersM.setBackground(new Color(194, 165, 108));
+            ViewOrdersM.setForeground(Color.WHITE);
+            ViewOrdersM.setBorderPainted(false);
+            ViewOrdersM.setFocusPainted(false);
+            ViewOrdersM.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+                this.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    ViewOrders frame = new ViewOrders(manager, conn);
+                    frame.setVisible(true);
+                });
+            }));
+            
+            // Add the Product Management button
+            JButton manageProductsBtn = new JButton("Διαχείριση Προϊόντων");
+            manageProductsBtn.setPreferredSize(new Dimension(180, 40));
+            manageProductsBtn.setBackground(new Color(194, 165, 108));
+            manageProductsBtn.setForeground(Color.WHITE);
+            manageProductsBtn.setBorderPainted(false);
+            manageProductsBtn.setFocusPainted(false);
+            manageProductsBtn.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+                this.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    ProductManagement frame = new ProductManagement(manager, conn);
+                    frame.setVisible(true);
+                });
+            }));
+            
+            buttonPanelM.add(ViewOrdersM);
+            buttonPanelM.add(manageProductsBtn);
+            contentPanel.add(buttonPanelM);
+            break;
             default:
                 contentPanel.add(new JLabel("Unknown role: " + user.getRole()));
         }
@@ -139,5 +193,97 @@ public class HomePage extends JFrame {
             e.printStackTrace();
         }
         return null;  // Επιστρέφει null αν δεν βρεθεί ο οδηγός
+    }
+
+    public static Manager getManagerByUserID(int userID, Connection conn) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+    
+        try {
+            // Ερώτημα για αναζήτηση του Manager με το συγκεκριμένο userID
+            String sql = "SELECT * FROM Manager m INNER JOIN User u ON m.userID = u.userID WHERE m.userID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, userID);  // Ρύθμιση του userID στο ερώτημα
+    
+            rs = stmt.executeQuery();
+    
+            // Αν βρεθεί ο αντίστοιχος Manager
+            if (rs.next()) {
+                int managerID = rs.getInt("managerID");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                String email = rs.getString("email");
+                String role = rs.getString("role");
+                String name = rs.getString("name");
+                int score = rs.getInt("score");
+    
+                return new Manager(managerID, userID, username, password, email, role, name, score);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    
+        return null;  // Επιστρέφει null αν δεν βρεθεί ο manager
+    }    
+
+    private void openNewOrderScreen(DeliveryDriver deliveryDriver, Connection conn){
+        ArrayList<Customer> customers = new ArrayList<>();
+        ArrayList<Product> products = new ArrayList<>();
+
+        String sql = "SELECT * FROM Customer";
+    
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+    
+            while (rs.next()) {
+                int id = rs.getInt("CustomerID");
+                String name = rs.getString("name");
+                String phone = rs.getString("phone");
+                String email = rs.getString("email");
+                String address = rs.getString("address");
+    
+                customers.add(new Customer(id, name, phone, email, address));
+            }
+    
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error fetching customers from the database.");
+            return; // μην συνεχίσεις αν αποτύχει το query
+        }
+    
+        // Query για προϊόντα
+        String productSQL = "SELECT * FROM Product";
+        try (PreparedStatement stmt = conn.prepareStatement(productSQL);
+            ResultSet rs = stmt.executeQuery()) {
+    
+            while (rs.next()) {
+                int id = rs.getInt("ProductID");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                double price = rs.getDouble("price");
+                String category = rs.getString("category");
+    
+                products.add(new Product(id, name, description, price, category));
+            }
+    
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error fetching products from the database.");
+            return;
+        }
+    
+        // Άνοιγμα παραθύρου παραγγελίας
+        SwingUtilities.invokeLater(() -> {
+            NewOrder frame = new NewOrder(deliveryDriver, customers, products, conn);
+            frame.setVisible(true);
+        });
     }
 }
