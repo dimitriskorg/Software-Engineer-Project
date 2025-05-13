@@ -1,0 +1,307 @@
+@startuml
+left to right direction
+hide circle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' --- Core Classes ---
+class Customer {
+  - int customerID
+  - String name
+  - String phone
+  - String email
+  - String address
+  + static int addNewCustomer(Customer c, Connection conn)
+}
+
+class Order {
+  - int orderID
+  - int customerID
+  - String status
+  - Date orderDate
+  - Date deliveryDate
+  - double totalAmount
+  + int saveOrder(Connection conn, int productId, int quantity)
+  + void updateOrderStatus(int orderID, String status, Connection conn)
+}
+
+class OrderItem {
+  - int orderItemID
+  - int orderID
+  - int productID
+  - int quantity
+  - double totalPrice
+}
+
+class Product {
+  - int productID
+  - String name
+  - String description
+  - double price
+  - String category
+  + static int addNewProduct(Product p, Connection conn)
+}
+
+class Inventory {
+  +InventoryID
+  --
+    productID
+    stockQuantity
+    location
+    lastUpdated
+}
+
+class Material {
+  +MaterialID
+  --
+    name
+    description
+    unitCost
+    supplier
+    availableQuantity
+}
+
+class User {
+  - int userID
+  - String username
+  - String password
+  - String email
+  - String role
+}
+
+class DeliveryDriver {
+  - int driverID
+  - String name
+  - String phone
+  - String licenseNumber
+  - int assignedOrders
+}
+
+class ProductionEmployee {
+  +employeeID
+  --
+    name
+    phone
+}
+
+class Accountant {
+  +AccountantID
+  --
+    name
+    stores
+    email
+    certificate
+}
+
+class Manager {
+  +ManagerID
+  --
+    name
+    store
+    email
+}
+
+class Invoice {
+  +InvoiceID
+  --
+    OrderID
+    issueDate
+    dueDate
+    total
+    isPaid
+}
+
+class Payment {
+  +PaymentID
+  --
+    OrderID
+    paymentMethod
+    amountPaid
+    paymentDate
+    status
+}
+
+class FinancialReport {
+  +reportID
+  --
+    accountantID
+    periodStart
+    periodEnd
+    totalIncome
+    totalExpenses
+}
+
+class Expenses {
+  +OrderID
+  --
+    amount
+    date
+}
+
+class Income {
+  +IncomeID
+  --
+    amount
+    date
+}
+
+class Notifications {
+  +NotificationID
+  --
+    recipientID
+    message
+    sendDate
+}
+
+class CustomerManagement {
+  - Manager manager
+  - Connection conn
+  - ArrayList<Customer> customers
+  - void loadCustomers()
+  - void showAddCustomerDialog()
+  - void deleteCustomer(int customerID)
+}
+
+class ProductManagement {
+  - Manager manager
+  - Connection conn
+  - ArrayList<Product> products
+  - void loadProducts()
+  - void showAddProductDialog()
+  - void deleteProduct(int productId)
+}
+
+class NewOrder {
+  - Connection conn
+  - DeliveryDriver deliveryDriver
+  - void updateTotalAmount()
+  - void createOrder()
+  - boolean validateCustomer(Customer customer)
+  - boolean validateQuantity(int quantity)
+  - boolean validateProduct(Product product)
+  - boolean validateDate(String dateStr)
+  - void showError(String msg)
+  - void showSuccess(String msg)
+}
+
+class ViewOrders {
+  - int currentOrderID
+  - Connection conn
+  - List<DeliveryDriver> deliveryDrivers
+  - User user
+  - void loadOrders()
+  - DeliveryDriver getDeliveryDriverByUserID(int userID)
+  - boolean isOrderAssigned(int orderID)
+  - void showOrders(Order order, Customer customer)
+  - void unassignOrder(int orderID)
+  - void refreshOrderList()
+  - void loadDrivers()
+  - void assignOrderToDriver(int orderID, int driverID)
+  - void showAssignmentPopup(int orderID)
+  - void checkOrderStatus(int orderID)
+  - void getOrderStatus(int orderID)
+}
+
+class HomePage {
+  - User user
+  - Connection conn
+  + DeliveryDriver getDeliveryDriverByUserID(int userID, Connection conn)
+  + Manager getManagerByUserID(int userID, Connection conn)
+  - void openNewOrderScreen(DeliveryDriver deliveryDriver, Connection conn)
+}
+
+' --- New Classes ---
+class InvoiceCreationScreen {
+  Connection conn
+  List<Customer> customers
+  + void openBillingScreen()
+  + void createMonthlyInvoices()
+  + void notifyInvoiceAvailable()
+  + List<Customer> getMonthlyCustomers(Connection conn)
+}
+
+class InvoiceViewScreen {
+  Connection conn
+  List<Invoice> invoices
+  + void openInvoiceViewScreen()
+  + void displayInvoices()
+  + void selectInvoice(int invoiceID)
+  + void printInvoice(int invoiceID)
+  + void emailInvoice(int invoiceID, String email)
+}
+
+class PaymentWindow {
+  int orderID
+  double totalAmount
+  String selectedMethod
+  + void display()
+  + void showPaymentOptions()
+  + void calculateOrderTotal(int orderID, Connection conn)
+}
+
+class ConfirmationWindow {
+  String paymentMethod
+  + void showConfirmationMessage(String method)
+  + void confirmPayment(int orderID, String method, Connection conn)
+  + void cancelPayment()
+}
+
+' --- Relationships ---
+Customer ||--o{ Order
+Order *--o{ OrderItem
+OrderItem }|--|| Product
+Product ||--o{ Inventory
+Material o--o{ Product
+User <|-- DeliveryDriver
+User <|-- ProductionEmployee
+User <|-- Accountant
+User <|-- Manager
+Order ||--o{ Invoice
+Order ||--o{ Payment
+Manager *--o{ FinancialReport
+Accountant ||--o{ FinancialReport
+Manager ||--o{ Expenses
+Manager ||--o{ Income
+Order ||--o{ Notifications
+Customer ||--o{ Notifications
+DeliveryDriver ||--o{ Notifications
+ProductionEmployee ||--o{ Notifications
+
+CustomerManagement --> Customer : manages >
+CustomerManagement --> Manager : uses >
+CustomerManagement --> HomePage : returns to >
+ProductManagement --> Product : manages >
+ProductManagement --> Manager : uses >
+ProductManagement --> HomePage : returns to >
+NewOrder --> DeliveryDriver
+NewOrder --> Customer
+NewOrder --> Product
+NewOrder --> Order
+NewOrder --> HomePage
+ViewOrders --> User
+ViewOrders --> DeliveryDriver
+ViewOrders --> Customer
+ViewOrders --> Order
+HomePage --> User
+HomePage ..> DeliveryDriver
+HomePage ..> Manager
+HomePage ..> ViewOrders
+HomePage ..> NewOrder
+HomePage ..> ProductManagement
+HomePage ..> CustomerManagement
+
+Manager --> HomePage : selects >
+Manager --> InvoiceViewScreen : Views Invoices >
+HomePage --> InvoiceCreationScreen : opens >
+HomePage --> ViewOrders : Views Orders >
+InvoiceCreationScreen --> Invoice : creates >
+InvoiceCreationScreen --> Notifications : sends notification >
+InvoiceCreationScreen --> Customer : fetches customers >
+InvoiceViewScreen --> Invoice : displays >
+InvoiceViewScreen --> Customer : fetches customer details >
+InvoiceViewScreen --> Notifications : sends notification >
+ViewOrders --> PaymentWindow : opens >
+PaymentWindow --> ConfirmationWindow : opens >
+ConfirmationWindow --> Payment : confirms payment >
+
+@enduml
