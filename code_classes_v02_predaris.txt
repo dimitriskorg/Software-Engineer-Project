@@ -1,0 +1,377 @@
+import java.util.Date;
+import java.sql.Connection;
+import java.util.List;
+
+// Existing and extended classes below
+
+public class Customer {
+    private int customerID;
+    private String name;
+    private String phone;
+    private String email;
+    private String address;
+
+    public Customer(int customerID, String name, String phone, String email, String address) {
+        this.customerID = customerID;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+    }
+}
+
+public class Order {
+    private int orderID;
+    private int customerID;
+    private String status;
+    private Date orderDate;
+    private Date deliveryDate;
+    private double totalAmount;
+
+    public Order(int orderID, int customerID, String status, Date orderDate, Date deliveryDate, double totalAmount) {
+        this.orderID = orderID;
+        this.customerID = customerID;
+        this.status = status;
+        this.orderDate = orderDate;
+        this.deliveryDate = deliveryDate;
+        this.totalAmount = totalAmount;
+    }
+
+    public List<Order> fetchPendingOrders(Connection conn) {
+        return null;
+    }
+
+    public Order fetchOrderDetails(int orderId, Connection conn) {
+        return null;
+    }
+
+    public boolean checkUrgentOrders(Connection conn) {
+        return false;
+    }
+
+    public boolean updateStatus(int orderId, String status, Connection conn) {
+        return true;
+    }
+}
+
+public class OrderItem {
+    private int orderItemID;
+    private int orderID;
+    private int productID;
+    private int quantity;
+    private double totalPrice;
+
+    public OrderItem(int orderItemID, int orderID, int productID, int quantity, double totalPrice) {
+        this.orderItemID = orderItemID;
+        this.orderID = orderID;
+        this.productID = productID;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+    }
+}
+
+public class Product {
+    private int productID;
+    private String name;
+    private String description;
+    private double price;
+    private String category;
+
+    public Product(int productID, String name, String description, double price, String category) {
+        this.productID = productID;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.category = category;
+    }
+}
+
+public class Inventory {
+    private int inventoryID;
+    private int productID;
+    private int stockQuantity;
+    private String location;
+    private Date lastUpdated;
+
+    public Inventory(int inventoryID, int productID, int stockQuantity, String location, Date lastUpdated) {
+        this.inventoryID = inventoryID;
+        this.productID = productID;
+        this.stockQuantity = stockQuantity;
+        this.location = location;
+        this.lastUpdated = lastUpdated;
+    }
+
+    public List<Inventory> getStockLevels(Connection conn) {
+        return null;
+    }
+
+    public boolean validateQuantity(int quantity) {
+        return quantity > 0;
+    }
+
+    public void updateStock(int itemId, int quantity, Connection conn) {}
+}
+
+public class FinancialReport {
+    private int reportID;
+    private int accountantID;
+    private String periodStart;
+    private String periodEnd;
+    private double totalIncome;
+    private double totalExpenses;
+
+    public FinancialReport(int reportID, int accountantID, String periodStart, String periodEnd, double totalIncome, double totalExpenses) {
+        this.reportID = reportID;
+        this.accountantID = accountantID;
+        this.periodStart = periodStart;
+        this.periodEnd = periodEnd;
+        this.totalIncome = totalIncome;
+        this.totalExpenses = totalExpenses;
+    }
+
+    public FinancialReport fetchSummary(String periodStart, String periodEnd, Connection conn) {
+        return null;
+    }
+
+    public Object fetchCharts(String periodStart, String periodEnd, Connection conn) {
+        return null;
+    }
+
+    public Object generateReport(String periodStart, String periodEnd, Connection conn) {
+        return null;
+    }
+}
+
+public class FinancialReportUI {
+    private Connection conn;
+
+    public FinancialReportUI(Connection conn) {
+        this.conn = conn;
+    }
+
+    public void requestData(Date start, Date end) {}
+    public void exportReport(Date start, Date end) {}
+    public void displaySummary(Object summary) {}
+    public void displayCharts(Object charts) {}
+}
+
+public class OrderPreparationUI {
+    private Connection conn;
+    private ProductionEmployee employee;
+
+    public OrderPreparationUI(Connection conn, ProductionEmployee employee) {
+        this.conn = conn;
+        this.employee = employee;
+    }
+
+    public void showOrdersScreen() {}
+    public void showOrderDetails(int orderId) {}
+    public void refreshOrderList() {}
+    public void displayUrgentOrderNotification() {}
+}
+
+public class InventoryManagementUI {
+    private Connection conn;
+    private InventoryEmployee employee;
+
+    public InventoryManagementUI(Connection conn, InventoryEmployee employee) {
+        this.conn = conn;
+        this.employee = employee;
+    }
+
+    public void loadStockData() {}
+    public void showUpdateScreen() {}
+    public void refreshStockList() {}
+}
+
+public class HomePage {
+    private User user;
+    private Connection conn;
+
+    public HomePage(User user, Connection conn) {
+        this.user = user;
+        this.conn = conn;
+    }
+
+    public DeliveryDriver getDeliveryDriverByUserID(int userID, Connection conn) {
+        return null;
+    }
+
+    public Manager getManagerByUserID(int userID, Connection conn) {
+        return null;
+    }
+
+    public void openNewOrderScreen(DeliveryDriver deliveryDriver, Connection conn) {}
+
+    public void openFinancialReportScreen(Connection conn) {
+        FinancialReportUI financialReportUI = new FinancialReportUI(conn);
+    }
+
+    public void openOrderPreparationScreen(Connection conn) {
+        OrderPreparationUI orderPrepUI = new OrderPreparationUI(conn, new ProductionEmployee(0, "", ""));
+    }
+
+    public void openInventoryManagementScreen(Connection conn) {
+        InventoryManagementUI inventoryUI = new InventoryManagementUI(conn, new InventoryEmployee(0, "", ""));
+    }
+}
+
+public class User {
+    private int userID;
+    private String username;
+    private String password;
+    private String email;
+    private String role;
+
+    public User(int userID, String username, String password, String email, String role) {
+        this.userID = userID;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+    }
+}
+
+public class Accountant {
+    private int accountantID;
+    private String name;
+    private String surname;
+    private String email;
+    private String certificate;
+
+    public Accountant(int accountantID, String name, String surname, String email, String certificate) {
+        this.accountantID = accountantID;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.certificate = certificate;
+    }
+}
+
+public class Manager {
+    private int managerID;
+    private String name;
+    private String surname;
+    private String email;
+
+    public Manager(int managerID, String name, String surname, String email) {
+        this.managerID = managerID;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+    }
+}
+
+public class ProductionEmployee {
+    private int employeeID;
+    private String name;
+    private String phone;
+
+    public ProductionEmployee(int employeeID, String name, String phone) {
+        this.employeeID = employeeID;
+        this.name = name;
+        this.phone = phone;
+    }
+}
+
+public class InventoryEmployee {
+    private int employeeID;
+    private String name;
+    private String phone;
+
+    public InventoryEmployee(int employeeID, String name, String phone) {
+        this.employeeID = employeeID;
+        this.name = name;
+        this.phone = phone;
+    }
+}
+
+public class DeliveryDriver {
+    private int driverID;
+    private String name;
+    private String phone;
+    private String licenseNumber;
+
+    public DeliveryDriver(int driverID, String name, String phone, String licenseNumber) {
+        this.driverID = driverID;
+        this.name = name;
+        this.phone = phone;
+        this.licenseNumber = licenseNumber;
+    }
+}
+
+public class Invoice {
+    private int invoiceID;
+    private int orderID;
+    private Date issueDate;
+    private Date dueDate;
+    private boolean isPaid;
+
+    public Invoice(int invoiceID, int orderID, Date issueDate, Date dueDate, boolean isPaid) {
+        this.invoiceID = invoiceID;
+        this.orderID = orderID;
+        this.issueDate = issueDate;
+        this.dueDate = dueDate;
+        this.isPaid = isPaid;
+    }
+}
+
+public class Material {
+    private int materialID;
+    private String name;
+    private String description;
+    private double unitCost;
+    private String supplier;
+    private int availableQuantity;
+
+    public Material(int materialID, String name, String description, double unitCost, String supplier, int availableQuantity) {
+        this.materialID = materialID;
+        this.name = name;
+        this.description = description;
+        this.unitCost = unitCost;
+        this.supplier = supplier;
+        this.availableQuantity = availableQuantity;
+    }
+}
+
+public class Notifications {
+    private int notificationID;
+    private String type;
+    private String message;
+    private Date sendDate;
+
+    public Notifications(int notificationID, String type, String message, Date sendDate) {
+        this.notificationID = notificationID;
+        this.type = type;
+        this.message = message;
+        this.sendDate = sendDate;
+    }
+}
+
+public class Payment {
+    private int paymentID;
+    private String paymentMethod;
+    private double amountPaid;
+    private Date paymentDate;
+
+    public Payment(int paymentID, String paymentMethod, double amountPaid, Date paymentDate) {
+        this.paymentID = paymentID;
+        this.paymentMethod = paymentMethod;
+        this.amountPaid = amountPaid;
+        this.paymentDate = paymentDate;
+    }
+}
+
+public class Expenses {
+    private int expenseID;
+    private int orderID;
+    private double amount;
+    private Date date;
+
+    public Expenses(int expenseID, int orderID, double amount, Date date) {
+        this.expenseID = expenseID;
+        this.orderID = orderID;
+        this.amount = amount;
+        this.date = date;
+    }
+}
