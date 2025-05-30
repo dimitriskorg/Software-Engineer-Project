@@ -80,13 +80,13 @@ public class Customer {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                JOptionPane.showMessageDialog(null, "Δεν επιστράφηκε customerID από τη βάση.", 
-                                             "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "No customerID returned", 
+                                             "Error", JOptionPane.ERROR_MESSAGE);
                 return -1;
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Σφάλμα κατά την προσθήκη πελάτη: " + e.getMessage(), 
-                                         "Σφάλμα Βάσης Δεδομένων", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error while adding customer: " + e.getMessage(), 
+                                         "Error", JOptionPane.ERROR_MESSAGE);
             return -1;
         }
     }

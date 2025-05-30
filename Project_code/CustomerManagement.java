@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +19,7 @@ public class CustomerManagement extends JFrame {
         this.customers = new ArrayList<>();
 
         // Set up the main frame
-        setTitle("Διαχείριση Πελατών");
+        setTitle("Manage Customers");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -30,25 +29,24 @@ public class CustomerManagement extends JFrame {
         headerPanel.setBackground(new Color(122, 156, 95));
         headerPanel.setLayout(new BorderLayout());
         
-        JLabel titleLabel = new JLabel("Διαχείριση Πελατών");
+        JLabel titleLabel = new JLabel("Manage Customers");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
 
         JButton logoutButton = new JButton("Logout");
-        logoutButton.setBackground(new Color(178, 34, 34));
+        logoutButton.setBackground(new Color(178, 34, 34)); // #b22222
         logoutButton.setForeground(Color.WHITE);
+        logoutButton.setOpaque(true);
+        logoutButton.setContentAreaFilled(true);
+        logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
+        logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutButton.addActionListener(e -> System.exit(0));
-        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        logoutPanel.setOpaque(false);
-        logoutPanel.add(logoutButton);
-        headerPanel.add(logoutPanel, BorderLayout.EAST);
-        add(headerPanel, BorderLayout.NORTH);
 
         // Back button
-        JButton backButton = new JButton("Πίσω");
+        JButton backButton = new JButton("Back");
         backButton.setBackground(new Color(194, 165, 108));
         backButton.setForeground(Color.WHITE);
         backButton.setBorderPainted(false);
@@ -60,6 +58,7 @@ public class CustomerManagement extends JFrame {
         });
         
         headerPanel.add(backButton, BorderLayout.WEST);
+         headerPanel.add(logoutButton, BorderLayout.EAST);
 
         // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -79,7 +78,7 @@ public class CustomerManagement extends JFrame {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Add Customer button
-        JButton addCustomerButton = new JButton("Προσθήκη Πελάτη");
+        JButton addCustomerButton = new JButton("Add Customer");
         addCustomerButton.setPreferredSize(new Dimension(180, 40));
         addCustomerButton.setBackground(new Color(194, 165, 108));
         addCustomerButton.setForeground(Color.WHITE);
@@ -109,21 +108,23 @@ public class CustomerManagement extends JFrame {
         customersPanel.removeAll();
         
         // Add title row
-        JPanel titleRow = new JPanel(new GridLayout(1, 6, 10, 0));
+        JPanel titleRow = new JPanel(new GridLayout(1, 7, 10, 0));
         titleRow.setBackground(new Color(230, 230, 230));
         titleRow.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         JLabel idTitle = new JLabel("ID");
         idTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel nameTitle = new JLabel("Όνομα");
+        JLabel nameTitle = new JLabel("Name");
         nameTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel phoneTitle = new JLabel("Τηλέφωνο");
+        JLabel phoneTitle = new JLabel("Phone");
         phoneTitle.setFont(new Font("Arial", Font.BOLD, 14));
         JLabel emailTitle = new JLabel("Email");
         emailTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel addressTitle = new JLabel("Διεύθυνση");
+        JLabel addressTitle = new JLabel("Address");
         addressTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel actionTitle = new JLabel("Ενέργειες");
+        JLabel invoiceTitle = new JLabel("Invoice");
+        invoiceTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel actionTitle = new JLabel("Actions");
         actionTitle.setFont(new Font("Arial", Font.BOLD, 14));
         
         titleRow.add(idTitle);
@@ -131,6 +132,7 @@ public class CustomerManagement extends JFrame {
         titleRow.add(phoneTitle);
         titleRow.add(emailTitle);
         titleRow.add(addressTitle);
+        titleRow.add(invoiceTitle);
         titleRow.add(actionTitle);
         
         titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
@@ -148,6 +150,7 @@ public class CustomerManagement extends JFrame {
                 String phone = rs.getString("phone");
                 String email = rs.getString("email");
                 String address = rs.getString("address");
+                String wantsInvoice = rs.getString("wantsInvoice");
                 
                 Customer customer = new Customer(id, name, phone, email, address);
                 customers.add(customer);
@@ -171,7 +174,7 @@ public class CustomerManagement extends JFrame {
     }
     
     private JPanel createCustomerPanel(Customer customer) {
-        JPanel panel = new JPanel(new GridLayout(1, 6, 10, 0));
+        JPanel panel = new JPanel(new GridLayout(1, 7, 10, 0));
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
@@ -201,8 +204,8 @@ public class CustomerManagement extends JFrame {
         }
         JLabel addressLabel = new JLabel(addressText != null ? addressText : "");
         
-        // 6. Delete button
-        JButton deleteButton = new JButton("Διαγραφή");
+        // 7. Delete button
+        JButton deleteButton = new JButton("Delete");
         deleteButton.setBackground(new Color(220, 53, 69));
         deleteButton.setForeground(Color.WHITE);
         deleteButton.setBorderPainted(false);
@@ -223,19 +226,19 @@ public class CustomerManagement extends JFrame {
     
     private void showAddCustomerDialog() {
         // Create a dialog for adding a new customer
-        JDialog dialog = new JDialog(this, "Προσθήκη Πελάτη", true);
-        dialog.setSize(400, 350);
+        JDialog dialog = new JDialog(this, "Add Customer", true);
+        dialog.setSize(400, 400);
         dialog.setLayout(new BorderLayout());
         
-        JPanel formPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Name field
-        JLabel nameLabel = new JLabel("Όνομα πελάτη:");
+        JLabel nameLabel = new JLabel("Name:");
         JTextField nameField = new JTextField(20);
         
         // Phone field
-        JLabel phoneLabel = new JLabel("Τηλέφωνο:");
+        JLabel phoneLabel = new JLabel("Phone:");
         JTextField phoneField = new JTextField(10);
         
         // Email field
@@ -243,8 +246,13 @@ public class CustomerManagement extends JFrame {
         JTextField emailField = new JTextField(20);
         
         // Address field
-        JLabel addressLabel = new JLabel("Διεύθυνση:");
+        JLabel addressLabel = new JLabel("Address:");
         JTextField addressField = new JTextField(20);
+        
+        // Invoice preference field
+        JLabel invoiceLabel = new JLabel("Wwants Invoice?:");
+        JComboBox<String> invoiceComboBox = new JComboBox<>(new String[]{"No", "Yes"});
+        invoiceComboBox.setSelectedIndex(0); // Default to "No"
         
         // Add components to form
         formPanel.add(nameLabel);
@@ -255,14 +263,16 @@ public class CustomerManagement extends JFrame {
         formPanel.add(emailField);
         formPanel.add(addressLabel);
         formPanel.add(addressField);
+        formPanel.add(invoiceLabel);
+        formPanel.add(invoiceComboBox);
         
         // Buttons panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
-        JButton cancelButton = new JButton("Ακύρωση");
+        JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> dialog.dispose());
         
-        JButton saveButton = new JButton("Καταχώρηση");
+        JButton saveButton = new JButton("Save");
         saveButton.setBackground(new Color(194, 165, 108));
         saveButton.setForeground(Color.WHITE);
         saveButton.setBorderPainted(false);
@@ -270,17 +280,20 @@ public class CustomerManagement extends JFrame {
             try {
                 if (nameField.getText().trim().isEmpty()) {
                     JOptionPane.showMessageDialog(dialog, 
-                        "Το όνομα πελάτη είναι υποχρεωτικό.", 
-                        "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                        "Name field is requiered.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 
                 if (phoneField.getText().trim().isEmpty()) {
                     JOptionPane.showMessageDialog(dialog, 
-                        "Το τηλέφωνο είναι υποχρεωτικό.", 
-                        "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                        "Phone field is requiered.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+        
+                // Get the selected invoice preference
+                String wantsInvoice = (String) invoiceComboBox.getSelectedItem();
         
                 // Βήμα 1: Δημιουργία dummy Customer αντικειμένου
                 Customer dummyCustomer = new Customer(-1, nameField.getText().trim(), 
@@ -308,13 +321,13 @@ public class CustomerManagement extends JFrame {
                 dialog.dispose();
         
                 JOptionPane.showMessageDialog(this, 
-                    "Ο πελάτης προστέθηκε επιτυχώς.", 
-                    "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                    "Customer added successfully", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
         
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(dialog, 
-                    "Σφάλμα κατά την αποθήκευση: " + ex.getMessage(), 
-                    "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                    "Error while saving: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });
@@ -332,8 +345,8 @@ public class CustomerManagement extends JFrame {
     private void deleteCustomer(int customerId) {
         // Show confirmation dialog
         int option = JOptionPane.showConfirmDialog(this, 
-            "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτόν τον πελάτη;", 
-            "Επιβεβαίωση διαγραφής", JOptionPane.YES_NO_OPTION);
+            "Are you sure you want to delete this customer?", 
+            "Confirm deleti", JOptionPane.YES_NO_OPTION);
         
         if (option == JOptionPane.YES_OPTION) {
             try {
@@ -341,15 +354,15 @@ public class CustomerManagement extends JFrame {
                 conn.setAutoCommit(false);
                 
                 // 1. Έλεγχος για παραγγελίες του πελάτη
-                String checkOrders = "SELECT COUNT(*) FROM CustomerOrder WHERE CustomerID = ?";
+                String checkOrders = "SELECT COUNT(*) FROM OrderTable WHERE CustomerID = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(checkOrders)) {
                     stmt.setInt(1, customerId);
                     ResultSet rs = stmt.executeQuery();
                     if (rs.next() && rs.getInt(1) > 0) {
                         conn.rollback();
                         JOptionPane.showMessageDialog(this, 
-                            "Δεν είναι δυνατή η διαγραφή! Ο πελάτης έχει παραγγελίες στο σύστημα.", 
-                            "Προειδοποίηση", JOptionPane.WARNING_MESSAGE);
+                            "Deletion cannot be performed. Customer has pending order(s)", 
+                            "Warning", JOptionPane.WARNING_MESSAGE);
                         conn.setAutoCommit(true);
                         return;
                     }
@@ -368,8 +381,8 @@ public class CustomerManagement extends JFrame {
                         
                         // Show success message
                         JOptionPane.showMessageDialog(this, 
-                            "Ο πελάτης αφαιρέθηκε επιτυχώς.", 
-                            "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                            "Customer deleted successfully", 
+                            "Success", JOptionPane.INFORMATION_MESSAGE);
                         
                         // Reload customers
                         loadCustomers();
@@ -378,8 +391,8 @@ public class CustomerManagement extends JFrame {
                         conn.rollback();
                         conn.setAutoCommit(true);
                         JOptionPane.showMessageDialog(this, 
-                            "Ο πελάτης δεν βρέθηκε.", 
-                            "Προειδοποίηση", JOptionPane.WARNING_MESSAGE);
+                            "Customer not found.", 
+                            "Warning", JOptionPane.WARNING_MESSAGE);
                     }
                 }
                 
@@ -394,8 +407,8 @@ public class CustomerManagement extends JFrame {
                 
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this, 
-                    "Σφάλμα κατά τη διαγραφή του πελάτη: " + e.getMessage(), 
-                    "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                    "Error while deleting customer: " + e.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

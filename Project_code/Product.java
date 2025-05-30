@@ -57,13 +57,13 @@ public class Product {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                JOptionPane.showMessageDialog(null, "Δεν επιστράφηκε productID από τη βάση.", 
-                                             "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "No productID returned from database.", 
+                                             "Error", JOptionPane.ERROR_MESSAGE);
                 return -1;
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Σφάλμα κατά την προσθήκη προϊόντος: " + e.getMessage(), 
-                                         "Σφάλμα Βάσης Δεδομένων", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error while adding product: " + e.getMessage(), 
+                                         "Error", JOptionPane.ERROR_MESSAGE);
             return -1;
         }
     }

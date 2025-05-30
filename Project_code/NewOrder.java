@@ -31,8 +31,8 @@ public class NewOrder extends JFrame {
         headerPanel.add(titleLabel, BorderLayout.CENTER);
     
         logoutButton = new JButton("Logout");
-        logoutButton.setBackground(new Color(178, 34, 34));
-        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setBackground(new Color(255,0,0));
+        logoutButton.setForeground(Color.BLACK);
         logoutButton.setFocusPainted(false);
         logoutButton.addActionListener(e -> System.exit(0));
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -42,7 +42,7 @@ public class NewOrder extends JFrame {
         add(headerPanel, BorderLayout.NORTH);
         
         // Back button
-        JButton backButton = new JButton("Πίσω");
+        JButton backButton = new JButton("Back");
         backButton.setBackground(new Color(194, 165, 108));
         backButton.setForeground(Color.WHITE);
         backButton.setBorderPainted(false);

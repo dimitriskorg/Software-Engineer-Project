@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ProductManagement extends JFrame {
-    private Manager manager;
+    Manager manager;
     private Connection conn;
     private ArrayList<Product> products;
     private JPanel productsPanel;
@@ -20,7 +20,7 @@ public class ProductManagement extends JFrame {
         this.products = new ArrayList<>();
 
         // Set up the main frame
-        setTitle("Διαχείριση Προϊόντων");
+        setTitle("Manage Products");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -30,25 +30,24 @@ public class ProductManagement extends JFrame {
         headerPanel.setBackground(new Color(122, 156, 95));
         headerPanel.setLayout(new BorderLayout());
         
-        JLabel titleLabel = new JLabel("Διαχείριση Προϊόντων");
+        JLabel titleLabel = new JLabel("Manage Products");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
 
         JButton logoutButton = new JButton("Logout");
-        logoutButton.setBackground(new Color(178, 34, 34));
+        logoutButton.setBackground(new Color(178, 34, 34)); // #b22222
         logoutButton.setForeground(Color.WHITE);
+        logoutButton.setOpaque(true);
+        logoutButton.setContentAreaFilled(true);
+        logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
+        logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutButton.addActionListener(e -> System.exit(0));
-        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        logoutPanel.setOpaque(false);
-        logoutPanel.add(logoutButton);
-        headerPanel.add(logoutPanel, BorderLayout.EAST);
-        add(headerPanel, BorderLayout.NORTH);
 
         // Back button
-        JButton backButton = new JButton("Πίσω");
+        JButton backButton = new JButton("Back");
         backButton.setBackground(new Color(194, 165, 108));
         backButton.setForeground(Color.WHITE);
         backButton.setBorderPainted(false);
@@ -60,6 +59,7 @@ public class ProductManagement extends JFrame {
         });
         
         headerPanel.add(backButton, BorderLayout.WEST);
+        headerPanel.add(logoutButton, BorderLayout.EAST);
 
         // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -79,7 +79,7 @@ public class ProductManagement extends JFrame {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Add Product button
-        JButton addProductButton = new JButton("Προσθήκη Προϊόντος");
+        JButton addProductButton = new JButton("Add Product");
         addProductButton.setPreferredSize(new Dimension(180, 40));
         addProductButton.setBackground(new Color(194, 165, 108));
         addProductButton.setForeground(Color.WHITE);
@@ -114,15 +114,15 @@ public class ProductManagement extends JFrame {
         
         JLabel idTitle = new JLabel("ID");
         idTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel nameTitle = new JLabel("Όνομα");
+        JLabel nameTitle = new JLabel("Name");
         nameTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel catTitle = new JLabel("Κατηγορία");
+        JLabel catTitle = new JLabel("Category");
         catTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel descTitle = new JLabel("Περιγραφή");
+        JLabel descTitle = new JLabel("Description");
         descTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel priceTitle = new JLabel("Τιμή");
+        JLabel priceTitle = new JLabel("Price");
         priceTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel actionTitle = new JLabel("Ενέργειες");
+        JLabel actionTitle = new JLabel("Actions");
         actionTitle.setFont(new Font("Arial", Font.BOLD, 14));
         
         titleRow.add(idTitle);
@@ -160,8 +160,8 @@ public class ProductManagement extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, 
-                "Σφάλμα κατά τη φόρτωση των προϊόντων: " + e.getMessage(), 
-                "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                "Error loading products: " + e.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
         
         // Refresh the panel
@@ -197,7 +197,7 @@ public class ProductManagement extends JFrame {
         JLabel priceLabel = new JLabel(String.format("%.2f €", product.getPrice()));
         
         // 6. Delete button
-        JButton deleteButton = new JButton("Διαγραφή");
+        JButton deleteButton = new JButton("Delete");
         deleteButton.setBackground(new Color(220, 53, 69));
         deleteButton.setForeground(Color.WHITE);
         deleteButton.setBorderPainted(false);
@@ -218,7 +218,7 @@ public class ProductManagement extends JFrame {
     
     private void showAddProductDialog() {
         // Create a dialog for adding a new product
-        JDialog dialog = new JDialog(this, "Προσθήκη Προϊόντος", true);
+        JDialog dialog = new JDialog(this, "Add Product", true);
         dialog.setSize(400, 300);
         dialog.setLayout(new BorderLayout());
         
@@ -226,20 +226,20 @@ public class ProductManagement extends JFrame {
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Name field
-        JLabel nameLabel = new JLabel("Όνομα προϊόντος:");
+        JLabel nameLabel = new JLabel("Product name:");
         JTextField nameField = new JTextField(20);
         
         // Price field
-        JLabel priceLabel = new JLabel("Τιμή:");
+        JLabel priceLabel = new JLabel("Price:");
         JTextField priceField = new JTextField(10);
         
         // Description field
-        JLabel descLabel = new JLabel("Περιγραφή (προαιρετικά):");
+        JLabel descLabel = new JLabel("Description (optional):");
         JTextArea descArea = new JTextArea(3, 20);
         JScrollPane descScrollPane = new JScrollPane(descArea);
         
         // Category field
-        JLabel categoryLabel = new JLabel("Κατηγορία:");
+        JLabel categoryLabel = new JLabel("Category:");
         JTextField categoryField = new JTextField(20);
         
         // Add components to form
@@ -255,10 +255,10 @@ public class ProductManagement extends JFrame {
         // Buttons panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         
-        JButton cancelButton = new JButton("Ακύρωση");
+        JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> dialog.dispose());
         
-        JButton saveButton = new JButton("Καταχώρηση");
+        JButton saveButton = new JButton("Save");
         saveButton.setBackground(new Color(194, 165, 108));
         saveButton.setForeground(Color.WHITE);
         saveButton.setBorderPainted(false);
@@ -266,8 +266,8 @@ public class ProductManagement extends JFrame {
             try {
                 if (nameField.getText().trim().isEmpty()) {
                     JOptionPane.showMessageDialog(dialog, 
-                        "Το όνομα προϊόντος είναι υποχρεωτικό.", 
-                        "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                        "Product name is mandatory", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
         
@@ -276,14 +276,14 @@ public class ProductManagement extends JFrame {
                     price = Double.parseDouble(priceField.getText());
                     if (price < 0) {
                         JOptionPane.showMessageDialog(dialog, 
-                            "Η τιμή δεν μπορεί να είναι αρνητική.", 
-                            "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                            "Price cannot be negative.", 
+                            "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(dialog, 
-                        "Παρακαλώ εισάγετε έγκυρη τιμή.", 
-                        "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                        "Enter a valid price", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
         
@@ -308,13 +308,13 @@ public class ProductManagement extends JFrame {
                 dialog.dispose();
         
                 JOptionPane.showMessageDialog(this, 
-                    "Το προϊόν προστέθηκε επιτυχώς.", 
-                    "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                    "Product added successfully.", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
         
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(dialog, 
-                    "Σφάλμα κατά την αποθήκευση: " + ex.getMessage(), 
-                    "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                    "Error while saving: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });
@@ -332,8 +332,8 @@ public class ProductManagement extends JFrame {
     private void deleteProduct(int productId) {
     // Show confirmation dialog
     int option = JOptionPane.showConfirmDialog(this, 
-        "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το προϊόν;", 
-        "Επιβεβαίωση διαγραφής", JOptionPane.YES_NO_OPTION);
+        "Are you sure you want to delete the product?", 
+        "Confirm deletion", JOptionPane.YES_NO_OPTION);
     
     if (option == JOptionPane.YES_OPTION) {
         try {
@@ -381,8 +381,8 @@ public class ProductManagement extends JFrame {
             
             // Show success message
             JOptionPane.showMessageDialog(this, 
-                "Το προϊόν αφαιρέθηκε επιτυχώς.", 
-                "Επιτυχία", JOptionPane.INFORMATION_MESSAGE);
+                "Product deleted successfully", 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
             
             // Reload products
             loadProducts();
@@ -398,8 +398,8 @@ public class ProductManagement extends JFrame {
             
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, 
-                "Σφάλμα κατά τη διαγραφή του προϊόντος: " + e.getMessage(), 
-                "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                "Error while deleting product: " + e.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
