@@ -1,160 +1,182 @@
--- 1. User table (UserID AUTO_INCREMENT)
-INSERT INTO User (username, password, email, role) VALUES 
-  ('john_papadopoulos','12345','john@example.com','Manager'),
-  ('anna_miller','12345','anna_miller@example.com','Accountant'),
-  ('mike_davis','12345','mike@example.com','DeliveryDriver'),
-  ('mary_brown','12345','mary_brown@example.com','ProductionStaff'),
-  ('kevin_smith','12345','kevin_smith@example.com','Manager'),
-  ('elaine_clark','12345','elaine_clark@example.com','Accountant'),
-  ('george_adams','12345','george_adams@example.com','DeliveryDriver'),
-  ('sofia_turner','12345','sofia_turner@example.com','ProductionStaff'),
-  ('peter_jones','12345','peter_jones@example.com','Manager'),
-  ('elena_martin','12345','elena_martin@example.com','DeliveryDriver'),
-  ('david_thomas','12345','david_thomas@example.com','Accountant'),
-  ('kate_wilson','12345','kate_wilson@example.com','Manager'),
-  ('julia_evans','12345','julia_evans@example.com','ProductionStaff'),
-  ('andrew_lewis','12345','andrew_lewis@example.com','DeliveryDriver'),
-  ('thanos_cooper','12345','thanos_cooper@example.com','DeliveryDriver'),
-  ('ellen_harris','12345','ellen_harris@example.com','DeliveryDriver'),
-  ('chris_perez','12345','chris_perez@example.com','Accountant'),
-  ('victoria_white','12345','victoria_white@example.com','Accountant'),
-  ('aris_brown','12345','aris_brown@example.com','Accountant'),
-  ('sophia_miller','12345','sophia_miller@example.com','Accountant');
 
--- 2. Customer table (CustomerID AUTO_INCREMENT)
-INSERT INTO Customer (name, phone, email, address, wantsInvoice) VALUES
-  ('Alice Green','555-1234','alice@example.com','10 Maple Street, Springfield','Yes'),
-  ('Bob White','555-2345','bob@example.com','5 Oak Avenue, Springfield','No'),
-  ('Charlie Black','555-3456','charlie@example.com','12 Pine Road, Springfield','Yes'),
-  ('Deborah Blue','555-4567','deborah@example.com','20 Birch Street, Springfield','No'),
-  ('Ella Gray','555-5678','ella@example.com','1 Constitution Plaza, Springfield','Yes'),
-  ('Frank Green','555-6789','frank@example.com','3 Liberty Lane, Springfield','Yes'),
-  ('George Brown','555-7890','george@example.com','100 K Street, Springfield','No'),
-  ('Hannah White','555-8901','hannah@example.com','15 Willow Road, Springfield','Yes'),
-  ('Isla Black','555-9012','isla@example.com','213 Redwood Street, Springfield','No'),
-  ('Jack Green','555-4321','jackgreen@example.com','654 Oak Street, Springfield','Yes'),
-  ('Kate Johnson','555-5432','kate@example.com','543 Pine Lane, Springfield','No');
+-- Πίνακας User
+INSERT INTO User VALUES (1, 'john_doe', 'password123', 'john@example.com', 'Manager');
+INSERT INTO User VALUES (2, 'anna_smith', 'pass456', 'anna@example.com', 'Accountant');
+INSERT INTO User VALUES (3, 'mike_driver', 'driverpass', 'mike@example.com', 'DeliveryDriver');
+INSERT INTO User VALUES (4, 'julia_prod', 'prodpass', 'julia@example.com', 'ProductionEmployee');
 
--- 3. Product table (ProductID AUTO_INCREMENT)
-INSERT INTO Product (name, description, price, category) VALUES
-  ('Sourdough Bread','Artisan sourdough loaf',5.00,'Bread'),
-  ('Whole Wheat Bread','Healthy whole wheat loaf',4.50,'Bread'),
-  ('Croissant','Buttery French croissant',2.50,'Pastry'),
-  ('Chocolate Muffin','Rich chocolate muffin',3.00,'Pastry'),
-  ('Bagel','Sesame seed bagel',1.50,'Bread'),
-  ('Blueberry Muffin','Fresh blueberry muffin',3.00,'Pastry'),
-  ('Baguette','Classic French baguette',2.00,'Bread'),
-  ('Donut','Glazed ring donut',1.75,'Pastry'),
-  ('Brownie','Chocolate brownie square',2.75,'Pastry'),
-  ('Cupcake','Vanilla cupcake with icing',2.25,'Pastry'),
-  ('Cake Slice','Slice of birthday cake',4.00,'Dessert'),
-  ('Muffin Box','Box of 6 assorted muffins',15.00,'Pastry');
+-- Πίνακας Customer
+INSERT INTO Customer VALUES (1, 'Alice Green', '1234567890', 'alice@example.com', '123 Maple Street');
 
--- 4. Material table (MaterialID AUTO_INCREMENT)
-INSERT INTO Material (name, description, unitCost, supplier, availableQuantity) VALUES
-  ('Flour','All-purpose flour',0.50,'FlourCo',1000),
-  ('Sugar','Granulated sugar',0.30,'SweetCo',800),
-  ('Yeast','Dry yeast packets',0.20,'RiseCo',500),
-  ('Butter','Unsalted butter',1.00,'DairyCo',600);
+-- Πίνακας DeliveryDriver
+INSERT INTO DeliveryDriver VALUES (1, 3, 'Mike Johnson', '9876543210', 'LIC123456', 2);
 
--- 5. DeliveryDriver (DriverID AUTO_INCREMENT)
-INSERT INTO DeliveryDriver (UserID, name, phone, LicenseNumber, assignedOrders) VALUES
-  (3, 'Nick Davis','555-9876','LIC12345',2),
-  (7, 'George Adams','555-1122','LIC98765',3),
-  (10,'Elena Martin','555-2233','LIC12378',4),
-  (14,'Andrew Lewis','555-3344','LIC45612',5),
-  (15,'Thanos Cooper','555-4455','LIC78945',2),
-  (16,'Ellen Harris','555-5566','LIC01234',3);
+-- Πίνακας ProductionEmployee
+INSERT INTO ProductionEmployee VALUES (1, 4, 'Julia Brown', '5557778888');
 
--- 6. ProductionEmployee (EmployeeID AUTO_INCREMENT)
-INSERT INTO ProductionEmployee (UserID, name, phone) VALUES
-  (4, 'Mary Brown','555-7778'),
-  (8, 'Sofia Turner','555-2345'),
-  (13,'Julia Evans','555-3456');
+-- Πίνακας Accountant
+INSERT INTO Accountant VALUES (1, 2, 'Anna Smith', 40, 'anna@example.com', 'CERT987');
 
--- 7. Accountant (AccountantID AUTO_INCREMENT)
-INSERT INTO Accountant (UserID, name, hours, email, Certificate) VALUES
-  (2, 'Anna Miller',40,'anna@bakery.com','CERT987'),
-  (6, 'Elaine Clark',30,'elaine@bakery.com','CERT654'),
-  (11,'David Thomas',35,'david@bakery.com','CERT789'),
-  (17,'Chris Perez',28,'chris@bakery.com','CERT321'),
-  (18,'Victoria White',40,'victoria@bakery.com','CERT654'),
-  (19,'Aris Brown',32,'aris@bakery.com','CERT987'),
-  (20,'Sophia Miller',45,'sophia@bakery.com','CERT321');
+-- Πίνακας Manager
+INSERT INTO Manager VALUES (1, 1, 'John Doe', 90, 'john@example.com');
 
--- 8. Manager (ManagerID AUTO_INCREMENT)
-INSERT INTO Manager (UserID, name, Score, email) VALUES
-  (1, 'John Papadopoulos',90,'john@bakery.com'),
-  (5, 'Kevin Smith',      88,'kevin@bakery.com'),
-  (9, 'Peter Jones',      92,'peter@bakery.com'),
-  (12,'Kate Wilson',      85,'kate@bakery.com');
+-- Πίνακας Product
+INSERT INTO Product VALUES (1, 'Treadmill', 'High quality treadmill', 1200.00, 'Fitness');
+INSERT INTO Product VALUES (2, 'Dumbbell Set', '20kg dumbbell set', 150.00, 'Weights');
 
--- 9. OrderTable (OrderID AUTO_INCREMENT)
-INSERT INTO OrderTable (CustomerID, status, orderDate, DeliveryDate, totalAmount) VALUES
-  (1,'Pending','2025-05-01',NULL,15.00),
-  (2,'Completed','2025-04-28','2025-05-02',7.50),
-  (3,'Shipped','2025-05-01',NULL,5.00),
-  (4,'Pending','2025-05-02',NULL,12.00),
-  (5,'Cancelled','2025-05-03',NULL,20.00),
-  (6,'Completed','2025-05-04','2025-05-07',10.00),
-  (7,'Pending','2025-05-05',NULL,3.50),
-  (8,'Shipped','2025-05-06','2025-05-09',8.00),
-  (9,'Completed','2025-05-07','2025-05-10',6.00),
-  (10,'Shipped','2025-05-08',NULL,9.00),
-  (11,'Pending','2025-05-09',NULL,5.00);
+-- Πίνακας OrderTable
+INSERT INTO OrderTable VALUES (1, 1, 'Pending', '2025-05-01', NULL, 1350.00);
 
--- 10. ProductMaterials (composite PK)
-INSERT INTO ProductMaterials (ProductID, MaterialID, quantityNeeded) VALUES
-  (1,1,2),
-  (1,3,1);
+-- Πίνακας OrderItem
+INSERT INTO OrderItem VALUES (1, 1, 1, 1, 1200.00);
+INSERT INTO OrderItem VALUES (2, 1, 2, 1, 150.00);
 
--- 11. Inventory (InventoryID AUTO_INCREMENT)
-INSERT INTO Inventory (productID, stockQuantity, location, lastUpdated) VALUES
-  (1,20,'Main Warehouse',NOW()),
-  (2,30,'Main Warehouse',NOW()),
-  (3,50,'Main Warehouse',NOW());
+-- Πίνακας Invoice
+INSERT INTO Invoice VALUES (1, 1, '2025-05-02', '2025-05-15', 1350.00, 'Unpaid');
 
--- 12. OrderItem (OrderItemID AUTO_INCREMENT)
-INSERT INTO OrderItem (orderID, productID, quantity, totalPrice) VALUES
-  (1,1,2,5.00),
-  (1,3,1,2.50),
-  (2,5,5,1.50),
-  (3,4,2,3.00),
-  (4,2,3,4.50),
-  (5,6,4,3.00),
-  (6,7,2,2.00),
-  (7,8,3,1.75),
-  (8,9,2,2.75),
-  (9,10,4,2.25),
-  (10,11,1,4.00),
-  (11,12,1,15.00);
+-- Πίνακας Inventory
+INSERT INTO Inventory VALUES (1, 1, 5, 'Warehouse A', NOW());
+INSERT INTO Inventory VALUES (2, 2, 10, 'Warehouse A', NOW());
 
--- 13. Invoice (InvoiceID AUTO_INCREMENT)
-INSERT INTO Invoice (OrderID, issueDate, dueDate, total, status) VALUES
-  (1,'2025-05-02','2025-05-15',15.00,'Unpaid');
+-- Πίνακας Material
+INSERT INTO Material VALUES (1, 'Steel', 'High grade steel', 10.00, 'Steel Inc.', 500);
+INSERT INTO Material VALUES (2, 'Rubber', 'Durable rubber', 5.00, 'Rubber Co.', 300);
 
--- 14. Payment (PaymentID AUTO_INCREMENT)
-INSERT INTO Payment (OrderID, paymentMethod, amountPaid, paymentDate, Status) VALUES
-  (1,'Credit Card',15.00,'2025-05-02','Completed');
+-- Πίνακας ProductMaterials
+INSERT INTO ProductMaterials VALUES (1, 1, 20);
+INSERT INTO ProductMaterials VALUES (1, 2, 5);
 
--- 15. Expenses (OrderID PK, όχι AUTO_INCREMENT)
-INSERT INTO Expenses (OrderID, amount, Date) VALUES
-  (1,10.00,'2025-05-02');
+-- Πίνακας Payment
+INSERT INTO Payment VALUES (1, 1, 'Credit Card', 1350.00, '2025-05-02', 'Completed');
 
--- 16. Income (IncomeID AUTO_INCREMENT)
-INSERT INTO Income (amount, Date) VALUES
-  (15.00,'2025-05-02');
+-- Πίνακας Income
+INSERT INTO Income VALUES (1, 1350.00, '2025-05-02');
 
--- 17. FinancialReport (reportId AUTO_INCREMENT)
-INSERT INTO FinancialReport (accountantID, periodStart, periodEnd, totalIncome, totalExpenses) VALUES
-  (1,'2025-05-01','2025-05-31',15.00,10.00);
+-- Πίνακας Expenses
+INSERT INTO Expenses VALUES (1, 700.00, '2025-05-02');
 
--- 18. Many-to-many relations (composite PK)
-INSERT INTO ManagerEmployees (ManagerID, EmployeeID) VALUES (1,1);
-INSERT INTO ManagerInventory (ManagerID, InventoryID) VALUES (1,1);
-INSERT INTO ManagerDrivers   (ManagerID, DriverID)    VALUES (1,3);
-INSERT INTO DriverOrders     (DriverID, OrderID)      VALUES (1,1);
+-- Πίνακας FinancialReport
+INSERT INTO FinancialReport VALUES (1, 1, '2025-05-01', '2025-05-31', 1350.00, 700.00);
 
--- 19. Notifications (NotificationID AUTO_INCREMENT)
-INSERT INTO Notifications (recipientID, Message, SendDate, UserType, UserTypeID) VALUES
-  (1,'Your order has been shipped.',NOW(),'Customer',1);
+-- Πίνακας Notifications
+INSERT INTO Notifications VALUES (1, 1, 'Your order has been shipped.', NOW(), 'Customer', 1);
+
+-- Πίνακας ManagerEmployees
+INSERT INTO ManagerEmployees VALUES (1, 1);
+
+-- Πίνακας ManagerInventory
+INSERT INTO ManagerInventory VALUES (1, 1);
+
+-- Πίνακας ManagerDrivers
+INSERT INTO ManagerDrivers VALUES (1, 1);
+
+-- Πίνακας DriverOrders
+INSERT INTO DriverOrders VALUES (1, 1);
+
+-- Πίνακας User
+INSERT INTO User VALUES (5, 'david_jones', 'david123', 'david@example.com', 'Manager');
+INSERT INTO User VALUES (6, 'susan_white', 'susan456', 'susan@example.com', 'Accountant');
+INSERT INTO User VALUES (7, 'lucas_driver', 'lucaspass', 'lucas@example.com', 'DeliveryDriver');
+INSERT INTO User VALUES (8, 'maria_prod', 'mariapass', 'maria@example.com', 'ProductionEmployee');
+INSERT INTO User VALUES (9, 'sophia_brown', 'sophiapass', 'sophia@example.com', 'Manager');
+INSERT INTO User VALUES (10, 'emily_lee', 'emilypass', 'emily@example.com', 'DeliveryDriver');
+INSERT INTO User VALUES (11, 'william_king', 'williampass', 'william@example.com', 'Accountant');
+INSERT INTO User VALUES (12, 'jack_fox', 'jackpass', 'jack@example.com', 'Manager');
+INSERT INTO User VALUES (13, 'olivia_wilson', 'oliviapass', 'olivia@example.com', 'ProductionEmployee');
+INSERT INTO User VALUES (14, 'noah_martin', 'noahpass', 'noah@example.com', 'DeliveryDriver');
+
+-- Πίνακας Customer
+INSERT INTO Customer VALUES (2, 'Bob White', '2345678901', 'bob@example.com', '456 Oak Avenue');
+INSERT INTO Customer VALUES (3, 'Charlie Black', '3456789012', 'charlie@example.com', '789 Pine Road');
+INSERT INTO Customer VALUES (4, 'Deborah Blue', '4567890123', 'deborah@example.com', '123 Birch Street');
+INSERT INTO Customer VALUES (5, 'Ella Gray', '5678901234', 'ella@example.com', '987 Cedar Drive');
+INSERT INTO Customer VALUES (6, 'Frankie Green', '6789012345', 'frankie@example.com', '654 Maple Lane');
+INSERT INTO Customer VALUES (7, 'George Brown', '7890123456', 'george@example.com', '321 Elm Avenue');
+INSERT INTO Customer VALUES (8, 'Hannah White', '8901234567', 'hannah@example.com', '432 Willow Road');
+INSERT INTO Customer VALUES (9, 'Isla Black', '9012345678', 'isla@example.com', '213 Redwood Street');
+INSERT INTO Customer VALUES (10, 'Jack Green', '1234325678', 'jackgreen@example.com', '654 Oak Street');
+INSERT INTO Customer VALUES (11, 'Kate Johnson', '2345436789', 'kate@example.com', '543 Pine Lane');
+
+-- Πίνακας DeliveryDriver
+INSERT INTO DeliveryDriver VALUES (2, 7, 'Lucas Parker', '1122334455', 'LIC987654', 3);
+INSERT INTO DeliveryDriver VALUES (3, 8, 'Emily Harper', '2233445566', 'LIC123789', 4);
+INSERT INTO DeliveryDriver VALUES (4, 9, 'Daniel Carter', '3344556677', 'LIC456123', 5);
+INSERT INTO DeliveryDriver VALUES (5, 10, 'Oliver Smith', '4455667788', 'LIC789456', 2);
+INSERT INTO DeliveryDriver VALUES (6, 11, 'Sophia Garcia', '5566778899', 'LIC012345', 3);
+INSERT INTO DeliveryDriver VALUES (7, 12, 'Mason Taylor', '6677889900', 'LIC345678', 4);
+INSERT INTO DeliveryDriver VALUES (8, 13, 'Ava Adams', '7788990011', 'LIC567890', 1);
+INSERT INTO DeliveryDriver VALUES (9, 14, 'Jacob Scott', '8899001122', 'LIC789012', 2);
+INSERT INTO DeliveryDriver VALUES (10, 15, 'Liam Carter', '9900112233', 'LIC890123', 6);
+INSERT INTO DeliveryDriver VALUES (11, 16, 'Sophia Harris', '1011122334', 'LIC123456', 7);
+
+-- Πίνακας ProductionEmployee
+INSERT INTO ProductionEmployee VALUES (2, 5, 'Maria Lopez', '2345678901');
+INSERT INTO ProductionEmployee VALUES (3, 6, 'John Williams', '3456789012');
+INSERT INTO ProductionEmployee VALUES (4, 7, 'Sarah Hall', '4567890123');
+INSERT INTO ProductionEmployee VALUES (5, 8, 'James White', '5678901234');
+INSERT INTO ProductionEmployee VALUES (6, 9, 'Emma Jackson', '6789012345');
+INSERT INTO ProductionEmployee VALUES (7, 10, 'Liam Harris', '7890123456');
+INSERT INTO ProductionEmployee VALUES (8, 11, 'Sophia Clark', '8901234567');
+INSERT INTO ProductionEmployee VALUES (9, 12, 'Jackson Lewis', '9012345678');
+INSERT INTO ProductionEmployee VALUES (10, 13, 'David King', '1122334455');
+INSERT INTO ProductionEmployee VALUES (11, 14, 'Lily Robinson', '2233445566');
+
+-- Πίνακας Accountant
+INSERT INTO Accountant VALUES (2, 11, 'William King', 30, 'william@example.com', 'CERT654');
+INSERT INTO Accountant VALUES (3, 12, 'Jack Fox', 35, 'jack@example.com', 'CERT789');
+INSERT INTO Accountant VALUES (4, 13, 'Olivia Wilson', 28, 'olivia@example.com', 'CERT321');
+INSERT INTO Accountant VALUES (5, 14, 'Noah Martin', 40, 'noah@example.com', 'CERT654');
+INSERT INTO Accountant VALUES (6, 15, 'Emily Lee', 32, 'emily@example.com', 'CERT987');
+INSERT INTO Accountant VALUES (7, 16, 'Sophia Harris', 45, 'sophia@example.com', 'CERT321');
+INSERT INTO Accountant VALUES (8, 17, 'David Parker', 50, 'david@example.com', 'CERT123');
+INSERT INTO Accountant VALUES (9, 18, 'Grace Walker', 29, 'grace@example.com', 'CERT876');
+INSERT INTO Accountant VALUES (10, 19, 'Max Brown', 39, 'max@example.com', 'CERT654');
+INSERT INTO Accountant VALUES (11, 20, 'Sophia White', 33, 'sophia@example.com', 'CERT111');
+
+-- Πίνακας Manager
+INSERT INTO Manager VALUES (2, 5, 'David Jones', 88, 'david@example.com');
+INSERT INTO Manager VALUES (3, 6, 'Susan White', 92, 'susan@example.com');
+INSERT INTO Manager VALUES (4, 7, 'Lucas Driver', 85, 'lucas@example.com');
+INSERT INTO Manager VALUES (5, 8, 'Maria Production', 78, 'maria@example.com');
+INSERT INTO Manager VALUES (6, 9, 'Sophia Brown', 90, 'sophia@example.com');
+INSERT INTO Manager VALUES (7, 10, 'Emily Lee', 95, 'emily@example.com');
+INSERT INTO Manager VALUES (8, 11, 'William King', 70, 'william@example.com');
+INSERT INTO Manager VALUES (9, 12, 'Jack Fox', 82, 'jack@example.com');
+INSERT INTO Manager VALUES (10, 13, 'Olivia Wilson', 75, 'olivia@example.com');
+INSERT INTO Manager VALUES (11, 14, 'Noah Martin', 88, 'noah@example.com');
+
+-- Πίνακας Product
+INSERT INTO Product VALUES (3, 'Exercise Bike', 'High-end stationary bike', 800.00, 'Fitness');
+INSERT INTO Product VALUES (4, 'Yoga Mat', 'Durable yoga mat', 30.00, 'Yoga');
+INSERT INTO Product VALUES (5, 'Dumbbells', '15kg dumbbells set', 120.00, 'Weights');
+INSERT INTO Product VALUES (6, 'Barbell Set', '20kg barbell set', 180.00, 'Weights');
+INSERT INTO Product VALUES (7, 'Rowing Machine', 'Water rowing machine', 1000.00, 'Fitness');
+INSERT INTO Product VALUES (8, 'Kettlebell', '8kg kettlebell', 40.00, 'Weights');
+INSERT INTO Product VALUES (9, 'Resistance Bands', 'Set of resistance bands', 25.00, 'Yoga');
+INSERT INTO Product VALUES (10, 'Jump Rope', 'Adjustable jump rope', 15.00, 'Cardio');
+INSERT INTO Product VALUES (11, 'Treadmill Belt', 'Replacement treadmill belt', 250.00, 'Parts');
+INSERT INTO Product VALUES (12, 'Elliptical Trainer', 'Smooth elliptical trainer', 950.00, 'Fitness');
+
+-- Πίνακας OrderTable
+INSERT INTO OrderTable VALUES (2, 2, 'Completed', '2025-04-28', '2025-05-02', 800.00);
+INSERT INTO OrderTable VALUES (3, 3, 'Shipped', '2025-05-01', NULL, 600.00);
+INSERT INTO OrderTable VALUES (4, 4, 'Pending', '2025-05-02', NULL, 400.00);
+INSERT INTO OrderTable VALUES (5, 5, 'Cancelled', '2025-05-03', NULL, 1200.00);
+INSERT INTO OrderTable VALUES (6, 6, 'Completed', '2025-05-04', '2025-05-07', 700.00);
+INSERT INTO OrderTable VALUES (7, 7, 'Pending', '2025-05-05', NULL, 150.00);
+INSERT INTO OrderTable VALUES (8, 8, 'Shipped', '2025-05-06', '2025-05-09', 600.00);
+INSERT INTO OrderTable VALUES (9, 9, 'Completed', '2025-05-07', '2025-05-10', 350.00);
+INSERT INTO OrderTable VALUES (10, 10, 'Shipped', '2025-05-08', NULL, 800.00);
+INSERT INTO OrderTable VALUES (11, 11, 'Pending', '2025-05-09', NULL, 500.00);
+
+-- Πίνακας OrderItem
+INSERT INTO OrderItem VALUES (3, 2, 3, 1, 800.00);
+INSERT INTO OrderItem VALUES (4, 3, 4, 1, 30.00);
+INSERT INTO OrderItem VALUES (5, 4, 5, 1, 120.00);
+INSERT INTO OrderItem VALUES (6, 5, 6, 1, 180.00);
+INSERT INTO OrderItem VALUES (7, 6, 7, 1, 1000.00);
+INSERT INTO OrderItem VALUES (8, 7, 8, 1, 40.00);
+INSERT INTO OrderItem VALUES (9, 8, 9, 1, 25.00);
+INSERT INTO OrderItem VALUES (10, 9, 10, 1, 15.00);
+INSERT INTO OrderItem VALUES (11, 10, 11, 1, 250.00);
+INSERT INTO OrderItem VALUES (12, 11, 12, 1, 950.00);
