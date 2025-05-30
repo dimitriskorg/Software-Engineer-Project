@@ -1,8 +1,10 @@
 # Software-Engineer-Project
-Paradoteo 1
 
--Project-description-v0.1
--Use-case-v0.1
--Domain-model-v0.1
+Paradoteo_v0.1
+Paradoteo_v0.2
+Paradoteo_v0.3
+Paradoteo_v0.4 ή Paradoteo_v1.0
 
--Project-code-v0.1
+&
+
+Code for the Application
