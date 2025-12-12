@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.border.*;
 import java.sql.*;
 import java.sql.Date;
@@ -50,7 +51,7 @@ public class ViewExpenses extends JFrame {
         logoutButton.addActionListener(e -> System.exit(0));
 
         // Back button
-        JButton backButton = new JButton("Back");
+        JButton backButton = new JButton("Πίσω");
         backButton.setBackground(new Color(194, 165, 108));
         backButton.setForeground(Color.WHITE);
         backButton.setBorderPainted(false);
